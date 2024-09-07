@@ -1,21 +1,32 @@
 import express from 'express';
-import { Command } from 'commander';
+import * as readline from 'readline';
 
 const app = express();
 const port = 3000;
 
-// Get command line args
-const program = new Command();
-program.option('-n, --name <type>', 'name');
-program.parse(process.argv);
-const options = program.opts();
+// Initialize CLI
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
+// Read CLI
+let userInput: String = '';
+rl.on('line', (input: String) => {
+  console.log(`Input: ${input}`);
+  userInput = input;
+});
+
+// Send data to port
 app.get('/', (req, res) => {
-  res.send(`Hello World! Name: ${options.name}`);
+  res.send(`Input: ${userInput}`);
 });
 
 app.listen(port, () => {
-  console.log(`Name: ${options.name}`);
   return console.log(`Express is listening at http://localhost:${port}`);
 });
 
+// CLose CLI
+rl.on('close', () =>{
+  console.log('Input stream closed...');
+})
