@@ -31,6 +31,5 @@ echo "Starting the install process..."
 
 install_node
 install_rpm
-install_typescript
 
 echo "Installation complete!"
