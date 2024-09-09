@@ -26,16 +26,6 @@ install_rpm() {
     fi
 }
 
-# Install TypeScript
-install_typescript() {
-    if command_exists tsc; then
-        echo "TypeScript is already installed."
-    else
-        echo "Installing TypeScript..."
-        sudo npm install -g typescript
-    fi
-}
-
 # Main script execution
 echo "Starting the install process..."
 
