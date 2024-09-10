@@ -19,11 +19,13 @@ rl.on('line', (input: String) => {
 
 // Send data to port
 app.get('/', (req, res) => {
+  // res.send('Hello World!');
   res.send(`Input: ${userInput}`);
 });
 
 app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
+  //return console.log(`Express is listening at http://localhost:${port}`);
+
 });
 
 // CLose CLI

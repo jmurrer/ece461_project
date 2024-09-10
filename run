@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# if you want to install the program, run ./run install
+if [ "$1" == "install" ]; then
+  echo "Installing Node program and dependencies"
+  npm install
+fi
+
+# if you want to run the program, run ./run start
+if [ "$1" == "start" ]; then
+  echo "Starting Node program"
+  npm start
+fi
