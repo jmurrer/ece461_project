@@ -16,13 +16,13 @@ install_node() {
     fi
 }
 
-# Install RPM
-install_rpm() {
-    if command_exists rpm; then
-        echo "RPM is already installed."
+# Install NPM
+install_npm() {
+    if command_exists npm; then
+        echo "NPM is already installed."
     else
-        echo "Installing RPM..."
-        sudo apt-get install -y rpm
+        echo "Installing NPM..."
+        sudo apt-get install -y npm
     fi
 }
 
@@ -30,6 +30,6 @@ install_rpm() {
 echo "Starting the install process..."
 
 install_node
-install_rpm
+install_npm
 
 echo "Installation complete!"
