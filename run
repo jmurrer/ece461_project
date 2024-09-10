@@ -4,16 +4,19 @@
 if [ "$1" == "install" ]; then
   echo "Installing Node program and dependencies"
   npm install
-fi
 
 # ./run test
-if [ "$1" == "test" ]; then
+elif [ "$1" == "test" ]; then
   echo "Testing Node program"
   npm start
-fi
 
 # ./run URL_FILE
-if [ "$1" == *.txt ]; then
+elif [ "$1" == *.txt ]; then
   echo "Running Node program on URLs in $1"
   npm start < $1
+
+# catch-all for errors
+else 
+  echo "Usage: ./run [install|test|URL_FILE]"
+  exit 1
 fi
