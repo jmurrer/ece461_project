@@ -17,6 +17,7 @@ elif [ "$1" == *.txt ]; then
 
 # catch-all for errors
 else 
+  echo "Error: Invalid argument"
   echo "Usage: ./run [install|test|URL_FILE]"
   exit 1
 fi
