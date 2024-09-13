@@ -1,4 +1,4 @@
-name: Run npm scripts on commit
+name: Run testing pipeline
 
 on:
   push:
