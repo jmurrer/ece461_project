@@ -1,6 +1,7 @@
 {
   "name": "ece461_project",
   "version": "1.0.0",
+  "type": "module",
   "description": "## Authors:",
   "main": "dist/app.js",
   "scripts": {
