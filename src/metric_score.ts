@@ -1,6 +1,47 @@
 // takes as input URL and returns a score
 export function netScore(url: string): number {
-  return -1;
+  
+  // if URL is Github repo, then call Github API
+  // and get all relevant data
+  if (url.includes("github.com")) {
+    // call Github API
+    fetchGitHubData(url)
+      .then(data => {
+        console.log(data);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+  // else if URL is npm package, then call npm API
+  // and get all relevant data
+  else if (url.includes("npmjs.com")) {
+    // call npm API
+    fetchNpmData(url)
+      .then(data => {
+        console.log(data);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  // store intermediate scores
+  let m_b: number = busFactorScore();
+  let m_c: number = correctnessScore();
+  let m_r: number = rampUpScore();
+  let m_rm: number = responsivenessScore();
+  let m_l: number = licenseScore();
+
+  // store weights
+  let w_b: number = 0.2;
+  let w_c: number = 0.25;
+  let w_r: number = 0.15;
+  let w_rm: number = 0.3;
+  let w_l: number = 0.1;
+
+  // calculate score and return
+  return w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
 }
 
 // analyzes bus factor and returns M_b(r) as specified
@@ -31,3 +72,37 @@ function licenseScore(): number {
   return -1;
 }
 
+// Define a function to fetch data from the GitHub API
+async function fetchGitHubData(url: string) {
+  // Extract the repository owner and name from the URL
+  const repoPath = url.split("github.com/")[1];
+  if (!repoPath) {
+    throw new Error("Invalid GitHub URL");
+  }
+  const [owner, repo] = repoPath.split("/").map(part => part.trim());
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.statusText}`);
+  }
+  const data = await response.json();
+  return data;
+}
+
+// Define a function to fetch data from the npm API
+async function fetchNpmData(url: string) {
+  // Extract the package name from the URL
+  const packagePath = url.split("npmjs.com/package/")[1];
+  if (!packagePath) {
+    throw new Error("Invalid npm URL");
+  }
+
+  const apiUrl = `https://registry.npmjs.org/${packagePath}`;
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    throw new Error(`npm API error: ${response.statusText}`);
+  }
+  const data = await response.json();
+  return data;
+}
