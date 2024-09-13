@@ -1,5 +1,19 @@
-// import * as readline from 'readline';
+// import express from 'express';       //commented for linter fixing
+// import * as readline from 'readline'; // commented as unneeded rn
+import * as ms from './metric_score';
 
+// use add()  from metric_score.ts
+console.log(ms.netScore("https://www.google.com"));
+
+
+// exit success
+process.exit(0);
+
+// web deployment stuff (commenting out for now)
+// const app = express();
+// const port = 3000;
+
+// CLI Stuff (commenting out for now)
 // // Initialize CLI
 // const rl = readline.createInterface({
 //   input: process.stdin,
@@ -7,11 +21,14 @@
 // });
 
 // // Read CLI
-// rl.on('line', (input: string) => {
+// let userInput: String = '';
+// rl.on('line', (input: String) => {
 //   console.log(`Input: ${input}`);
+//   userInput = input;
 // });
 
 // // CLose CLI
 // rl.on('close', () =>{
 //   console.log('Input stream closed...');
+
 // });
