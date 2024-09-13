@@ -1,9 +1,10 @@
-import express from 'express';
+// import express from 'express';       //commented for linter fixing
 import * as readline from 'readline';
 import * as ms from './metric_score';
 
 // use add()  from metric_score.ts
 console.log(ms.netScore("https://www.google.com"));
+
 
 // exit success
 process.exit(0);
