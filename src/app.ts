@@ -1,8 +1,8 @@
-import express from 'express';
+// import express from 'express';       //commented for linter fixing
 import * as readline from 'readline';
 
-const app = express();
-const port = 3000;
+// const app = express();        //commented for linter fixing 
+// const port = 3000;            //commented for linter fixing
 
 // Initialize CLI
 const rl = readline.createInterface({
@@ -11,10 +11,10 @@ const rl = readline.createInterface({
 });
 
 // Read CLI
-let userInput: String = '';
-rl.on('line', (input: String) => {
+// let userInput: string = '';        //commented for linter fixing
+rl.on('line', (input: string) => {
   console.log(`Input: ${input}`);
-  userInput = input;
+// userInput = input;               //commented for linter fixing
 });
 
 // Send data to port
