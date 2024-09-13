@@ -1,34 +1,32 @@
 import express from 'express';
 import * as readline from 'readline';
+import * as ms from './metric_score';
 
-const app = express();
-const port = 3000;
+// use add()  from metric_score.ts
+console.log(ms.netScore("https://www.google.com"));
 
-// Initialize CLI
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+// exit success
+process.exit(0);
 
-// Read CLI
-let userInput: String = '';
-rl.on('line', (input: String) => {
-  console.log(`Input: ${input}`);
-  userInput = input;
-});
+// web deployment stuff (commenting out for now)
+// const app = express();
+// const port = 3000;
 
-// Send data to port
-// app.get('/', (req, res) => {
-//   // res.send('Hello World!');
-//   res.send(`Input: ${userInput}`);
+// CLI Stuff (commenting out for now)
+// // Initialize CLI
+// const rl = readline.createInterface({
+//   input: process.stdin,
+//   output: process.stdout
 // });
 
-// app.listen(port, () => {
-//   //return console.log(`Express is listening at http://localhost:${port}`);
-
+// // Read CLI
+// let userInput: String = '';
+// rl.on('line', (input: String) => {
+//   console.log(`Input: ${input}`);
+//   userInput = input;
 // });
 
-// CLose CLI
-rl.on('close', () =>{
-  console.log('Input stream closed...');
-})
+// // CLose CLI
+// rl.on('close', () =>{
+//   console.log('Input stream closed...');
+// });
