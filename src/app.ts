@@ -1,33 +1,14 @@
-// import express from 'express';       //commented for linter fixing
-// import * as readline from 'readline'; // commented as unneeded rn
 import * as ms from './metric_score.js';
 
-// use add()  from metric_score.ts
-console.log(ms.netScore("https://www.google.com"));
+async function main() {
+    try {
+        const score = await ms.netScore("https://www.npmjs.com/package/safe-regex-test");
+        console.log(score);
+    } catch (err) {
+        console.log(err);
+    } finally {
+        process.exit(0);
+    }
+}
 
-
-// exit success
-process.exit(0);
-
-// web deployment stuff (commenting out for now)
-// const app = express();
-// const port = 3000;
-
-// CLI Stuff (commenting out for now)
-// // Initialize CLI
-// const rl = readline.createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// });
-
-// // Read CLI
-// let userInput: String = '';
-// rl.on('line', (input: String) => {
-//   console.log(`Input: ${input}`);
-//   userInput = input;
-// });
-
-// // CLose CLI
-// rl.on('close', () =>{
-//   console.log('Input stream closed...');
-// });
+main();
