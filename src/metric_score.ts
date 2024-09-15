@@ -13,6 +13,7 @@ export async function netScore(url: string): Promise<number> {
     }
   } else if (url.includes("npmjs.com")) {
     try {
+      console.log("Fetching NPM data...");
       data = await fetchNpmData(url);
     } catch (err) {
       console.error(err);
