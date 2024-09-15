@@ -8,7 +8,8 @@ if [ "$1" == "install" ]; then
 # ./run test
 elif [ "$1" == "test" ]; then
   echo "Testing Node program"
-  exit 0
+  npm start
+  exit 0 
 
 # ./run URL_FILE
 elif [ "$1" == *.txt ]; then
