@@ -23,6 +23,7 @@ export async function netScore(url: string): Promise<number> {
     console.log("Invalid URL");
     throw new Error("Invalid URL");
   }
+  console.log(data)
 
   // store intermediate scores
   let m_b: number = busFactorScore();
