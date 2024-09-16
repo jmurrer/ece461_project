@@ -1,29 +1,27 @@
 // takes as input URL and returns a score
-export function netScore(url: string): number {
-  
-  // if URL is Github repo, then call Github API
-  // and get all relevant data
+export async function netScore(url: string): Promise<number> {
+  let data;
+
+  // fetch data from GitHub and npm APIs
   if (url.includes("github.com")) {
-    // call Github API
-    fetchGitHubData(url)
-      .then(data => {
-        console.log(data);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  }
-  // else if URL is npm package, then call npm API
-  // and get all relevant data
-  else if (url.includes("npmjs.com")) {
-    // call npm API
-    fetchNpmData(url)
-      .then(data => {
-        console.log(data);
-      })
-      .catch(err => {
-        console.error(err);
-      });
+    console.log("Fetching GitHub data...");
+    try {
+      data = await fetchGitHubData(url);
+    } catch (err) {
+      console.error(err);
+      throw new Error("Error fetching GitHub data");
+    }
+  } else if (url.includes("npmjs.com")) {
+    try {
+      console.log("Fetching NPM data...");
+      data = await fetchNpmData(url);
+    } catch (err) {
+      console.error(err);
+      throw new Error("Error fetching npm data");
+    }
+  } else {
+    console.log("Invalid URL");
+    throw new Error("Invalid URL");
   }
 
   // store intermediate scores
@@ -74,20 +72,49 @@ function licenseScore(): number {
 
 // Define a function to fetch data from the GitHub API
 async function fetchGitHubData(url: string) {
-  // Extract the repository owner and name from the URL
-  const repoPath = url.split("github.com/")[1];
-  if (!repoPath) {
-    throw new Error("Invalid GitHub URL");
-  }
-  const [owner, repo] = repoPath.split("/").map(part => part.trim());
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-  const response = await fetch(apiUrl);
-  if (!response.ok) {
-    throw new Error(`GitHub API error: ${response.statusText}`);
-  }
-  const data = await response.json();
-  return data;
+    // Extract the repository owner and name from the URL
+    const repoPath = url.split("github.com/")[1];
+    if (!repoPath) {
+      throw new Error("Invalid GitHub URL");
+    }
+  
+    // Ensure the repository path is in the format 'owner/repo'
+    const [owner, repo] = repoPath.split("/").map(part => part.trim());
+    if (!owner || !repo) {
+      throw new Error("Invalid GitHub repository path");
+    }
+  
+    // Construct the GitHub API URL
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+    try {
+      const response = await fetch(apiUrl);
+  
+      // Check if the response is OK (status code 200-299)
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.statusText}`);
+      }
+  
+      // Parse the JSON response
+      const data = await response.json();
+  
+      // Optionally, you can log or process the data here
+      console.log("Fetched GitHub Data:", data);
+  
+      // Extract relevant information if needed
+      const result = {
+        stars: data.stargazers_count,
+        forks: data.forks_count,
+        issues: data.open_issues_count,
+        license: data.license ? data.license.name : 'No license',
+        updated_at: data.updated_at
+      };
+  
+      return result;
+  
+    } catch (error) {
+      console.error("Error fetching GitHub data:", error);
+      throw error; // Re-throw the error to be handled by the caller
+    }
 }
 
 // Define a function to fetch data from the npm API
@@ -100,9 +127,12 @@ async function fetchNpmData(url: string) {
 
   const apiUrl = `https://registry.npmjs.org/${packagePath}`;
   const response = await fetch(apiUrl);
+
   if (!response.ok) {
     throw new Error(`npm API error: ${response.statusText}`);
   }
   const data = await response.json();
+  console.log("Response: ", response);
+  console.log("Data: ", data);
   return data;
 }
