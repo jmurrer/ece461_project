@@ -13,6 +13,7 @@ export async function netScore(url: string): Promise<number> {
     }
   } else if (url.includes("npmjs.com")) {
     try {
+      console.log("Fetching NPM data...");
       data = await fetchNpmData(url);
     } catch (err) {
       console.error(err);
@@ -22,6 +23,7 @@ export async function netScore(url: string): Promise<number> {
     console.log("Invalid URL");
     throw new Error("Invalid URL");
   }
+  console.log(data)
 
   // store intermediate scores
   let m_b: number = busFactorScore();
@@ -71,20 +73,49 @@ function licenseScore(): number {
 
 // Define a function to fetch data from the GitHub API
 async function fetchGitHubData(url: string) {
-  // Extract the repository owner and name from the URL
-  const repoPath = url.split("github.com/")[1];
-  if (!repoPath) {
-    throw new Error("Invalid GitHub URL");
-  }
-  const [owner, repo] = repoPath.split("/").map(part => part.trim());
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-  const response = await fetch(apiUrl);
-  if (!response.ok) {
-    throw new Error(`GitHub API error: ${response.statusText}`);
-  }
-  const data = await response.json();
-  return data;
+    // Extract the repository owner and name from the URL
+    const repoPath = url.split("github.com/")[1];
+    if (!repoPath) {
+      throw new Error("Invalid GitHub URL");
+    }
+  
+    // Ensure the repository path is in the format 'owner/repo'
+    const [owner, repo] = repoPath.split("/").map(part => part.trim());
+    if (!owner || !repo) {
+      throw new Error("Invalid GitHub repository path");
+    }
+  
+    // Construct the GitHub API URL
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+    try {
+      const response = await fetch(apiUrl);
+  
+      // Check if the response is OK (status code 200-299)
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.statusText}`);
+      }
+  
+      // Parse the JSON response
+      const data = await response.json();
+  
+      // Optionally, you can log or process the data here
+      console.log("Fetched GitHub Data:", data);
+  
+      // Extract relevant information if needed
+      const result = {
+        stars: data.stargazers_count,
+        forks: data.forks_count,
+        issues: data.open_issues_count,
+        license: data.license ? data.license.name : 'No license',
+        updated_at: data.updated_at
+      };
+  
+      return result;
+  
+    } catch (error) {
+      console.error("Error fetching GitHub data:", error);
+      throw error; // Re-throw the error to be handled by the caller
+    }
 }
 
 // Define a function to fetch data from the npm API

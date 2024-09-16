@@ -4,7 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default {
-  files: ["**/*.{js,mjs,cjs,ts}"],
+  files: ["**/*.{cjs,ts}"],
   languageOptions: {
     globals: { ...globals.browser, ...globals.node },
     parser: tsParser,
@@ -18,4 +18,5 @@ export default {
     ...pluginJs.configs.recommended.rules,
     ...tsPlugin.configs.recommended.rules,
   },
+  ignores: ["**/dist/"]
 };
