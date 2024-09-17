@@ -1,5 +1,5 @@
 // takes as input URL and returns a score
-export async function netScore(url: string): Promise<number> {
+export async function netScore(url: string): Promise<string> {
   let data;
 
   // fetch data from GitHub and npm APIs
@@ -40,8 +40,22 @@ export async function netScore(url: string): Promise<number> {
   let w_rm: number = 0.3;
   let w_l: number = 0.1;
 
-  // calculate score and return
-  return w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
+  // calculate score
+  let mainScore: number =  w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
+  
+  // construct result object, JSONify, then return
+  const result = {
+    mainScore: mainScore,
+    scores: {
+      busFactor: { score: m_b, weight: w_b },
+      correctness: { score: m_c, weight: w_c },
+      rampUp: { score: m_r, weight: w_r },
+      responsiveness: { score: m_rm, weight: w_rm },
+      license: { score: m_l, weight: w_l }
+    }
+  };
+
+  return JSON.stringify(result, null, 2);
 }
 
 // analyzes bus factor and returns M_b(r) as specified
