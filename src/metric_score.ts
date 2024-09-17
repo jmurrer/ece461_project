@@ -23,14 +23,15 @@ export async function netScore(url: string): Promise<number> {
     console.log("Invalid URL");
     throw new Error("Invalid URL");
   }
-  console.log(data)
+  // console.log(data)
 
   // store intermediate scores
   let m_b: number = busFactorScore();
   let m_c: number = correctnessScore();
   let m_r: number = rampUpScore();
   let m_rm: number = responsivenessScore();
-  let m_l: number = licenseScore();
+  let m_l: number = licenseScore(data);
+  console.log("License score: ", m_l);
 
   // store weights
   let w_b: number = 0.2;
@@ -67,8 +68,9 @@ function responsivenessScore(): number {
   return -1;
 }
 
-function licenseScore(): number {
-  return -1;
+function licenseScore(data: any): number {
+  // returns 1 if license is present, 0 otherwise
+  return data.license ? 1 : 0;
 }
 
 // Define a function to fetch data from the GitHub API
