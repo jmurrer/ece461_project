@@ -31,7 +31,7 @@ export async function netScore(url: string): Promise<number> {
   let m_c: number = correctnessScore();
   let m_r: number = rampUpScore();
   let m_rm: number = responsivenessScore();
-  let m_l: number = licenseScore();
+  let m_l: number = licenseScore(data);
 
   // store weights
   let w_b: number = 0.2;
@@ -72,54 +72,6 @@ function licenseScore(data: any): number {
   // returns 1 if license is present, 0 otherwise
   return data.license ? 1 : 0;
 }
-
-// Define a function to fetch data from the GitHub API
-async function fetchGitHubData(url: string) {
-    // Extract the repository owner and name from the URL
-    const repoPath = url.split("github.com/")[1];
-    if (!repoPath) {
-      throw new Error("Invalid GitHub URL");
-    }
-  
-    // Ensure the repository path is in the format 'owner/repo'
-    const [owner, repo] = repoPath.split("/").map(part => part.trim());
-    if (!owner || !repo) {
-      throw new Error("Invalid GitHub repository path");
-    }
-  
-    // Construct the GitHub API URL
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-    try {
-      const response = await fetch(apiUrl);
-  
-      // Check if the response is OK (status code 200-299)
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.statusText}`);
-      }
-  
-      // Parse the JSON response
-      const data = await response.json();
-  
-      // Optionally, you can log or process the data here
-      console.log("Fetched GitHub Data:", data);
-  
-      // Extract relevant information if needed
-      const result = {
-        stars: data.stargazers_count,
-        forks: data.forks_count,
-        issues: data.open_issues_count,
-        license: data.license ? data.license.name : 'No license',
-        updated_at: data.updated_at
-      };
-  
-      return result;
-  
-    } catch (error) {
-      console.error("Error fetching GitHub data:", error);
-      throw error; // Re-throw the error to be handled by the caller
-    }
-}
-
 
 // Define a function to fetch data from the GitHub API
 async function fetchGitHubData(url: string) {
