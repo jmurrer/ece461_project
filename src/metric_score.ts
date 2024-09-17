@@ -4,7 +4,7 @@ export async function netScore(url: string): Promise<number> {
 
   // fetch data from GitHub and npm APIs
   if (url.includes("github.com")) {
-    console.log("Fetching GitHub data...");
+    // console.log("Fetching GitHub data...");
     try {
       data = await fetchGitHubData(url);
     } catch (err) {
@@ -13,14 +13,14 @@ export async function netScore(url: string): Promise<number> {
     }
   } else if (url.includes("npmjs.com")) {
     try {
-      console.log("Fetching NPM data...");
+      // console.log("Fetching NPM data...");
       data = await fetchNpmData(url);
     } catch (err) {
       console.error(err);
       throw new Error("Error fetching npm data");
     }
   } else {
-    console.log("Invalid URL");
+    console.error("Invalid URL");
     throw new Error("Invalid URL");
   }
   // console.log(data)
@@ -101,7 +101,7 @@ async function fetchGitHubData(url: string) {
       const data = await response.json();
   
       // Optionally, you can log or process the data here
-      console.log("Fetched GitHub Data:", data);
+      // console.log("Fetched GitHub Data:", data);
   
       // Extract relevant information if needed
       const result = {
@@ -135,7 +135,7 @@ async function fetchNpmData(url: string) {
     throw new Error(`npm API error: ${response.statusText}`);
   }
   const data = await response.json();
-  console.log("Response: ", response);
-  console.log("Data: ", data);
+  // console.log("Response: ", response);
+  // console.log("Data: ", data);
   return data;
 }

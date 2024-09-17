@@ -8,13 +8,14 @@ if [ "$1" == "install" ]; then
 # ./run test
 elif [ "$1" == "test" ]; then
   echo "Testing Node program"
-  npm start
+  npm start "test.txt"
   exit 0 
 
-# ./run URL_FILE
-elif [ "$1" == *.txt ]; then
-  echo "Running Node program on URLs in $1"
-  npm start < $1
+# ./run some text file
+elif [ -f "$1" ]; then
+  echo "Running Node program with file: $1"
+  npm start "$1"
+  exit 0
 
 # catch-all for errors
 else 
