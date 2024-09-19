@@ -47,7 +47,7 @@ export async function netScore(url: string): Promise<string> {
 
   // store intermediate scores
   let m_b: number = busFactorScore(count);
-  let m_c: number = correctnessScore();
+  let m_c: number = correctnessScore(data.issues);
   let m_r: number = rampUpScore();
   let m_rm: number = responsivenessScore();
   let m_l: number = licenseScore(data);
@@ -99,8 +99,20 @@ function busFactorScore(contributorsCount: number): number {
 
 // analyzes reliability/quality of codebase
 // and returns M_c,normalized(r) as specified in project plan
-function correctnessScore(): number {
-  return -1;
+function correctnessScore(IssueCount: number): number {
+  if (IssueCount === undefined || IssueCount === null) {
+    console.warn('Issue count is missing, returning correctness score of 0');
+    return 0; // No issue count present, return 0
+  }
+
+  // If there are 0 issues, return a perfect score of 1
+  if (IssueCount === 0) {
+    return 1;
+  }
+
+  const correctness = 1 / (1 + Math.log(1 + IssueCount));
+  
+  return parseFloat(correctness.toFixed(2));
 }
 
 // analyzes presence and completness of relevant documentation
