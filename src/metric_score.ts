@@ -25,9 +25,28 @@ export async function netScore(url: string): Promise<string> {
   }
   // console.log(data)
 
+  // structure for getting count (for bus factor) below
+  let count;  // how many people are contributing to the repo (for bus factor)
+  if (data.contributors_count || data.maintainers) {  // contributors for github and maintainers for npm
+    try {
+      if (data.contributors_count) {
+        const contributors = await fetchCollaboratorsCount(data.contributors_count);  // have to process the contributors url for GitHub
+        count = contributors.length;
+      } else {
+        count = data.maintainers;
+      }
+      // console.log("contributors/maintainers: ", count);
+    } catch (err) {
+      console.error("Error fetching contributors/maintainers:", err);
+      throw new Error("Error fetching contributors/maintainers");
+    }
+  } else {
+    console.error("No contributor or maintainer data available");
+    throw new Error("No contributor or maintainer data available");
+  }
 
   // store intermediate scores
-  let m_b: number = busFactorScore();
+  let m_b: number = busFactorScore(count);
   let m_c: number = correctnessScore(data.issues);
   let m_r: number = rampUpScore();
   let m_rm: number = responsivenessScore();
@@ -60,8 +79,22 @@ export async function netScore(url: string): Promise<string> {
 
 // analyzes bus factor and returns M_b(r) as specified
 // in project plan
-function busFactorScore(): number {
-  return -1;
+function busFactorScore(contributorsCount: number): number {
+  let busFactorScore;
+
+    // each comparison is to a number of contributors that has ranges of safe,moderate, low, and very low
+  if (contributorsCount >= 10) {
+    busFactorScore = 10;
+  } else if (contributorsCount >= 5) {
+    busFactorScore = 7;   
+  } else if (contributorsCount >= 2) {
+    busFactorScore = 4;
+  } else {
+    busFactorScore = 1;
+  }
+
+  return busFactorScore;
+  // return -1;
 }
 
 // analyzes reliability/quality of codebase
@@ -135,7 +168,8 @@ async function fetchGitHubData(url: string) {
         forks: data.forks_count,
         issues: data.open_issues_count,
         license: data.license ? data.license.name : 'No license',
-        updated_at: data.updated_at
+        updated_at: data.updated_at,
+        contributors_count: data.contributors_url
       };
   
       return result;
@@ -162,6 +196,32 @@ async function fetchNpmData(url: string) {
   }
   const data = await response.json();
   // console.log("Response: ", response);
-  // console.log("Data: ", data);
-  return data;
+  // console.log("NPM Data: ", data);
+  const maintainers = data.maintainers ? data.maintainers.length : 0;
+  // console.log("maintainers NPM", maintainers)
+
+  return {
+    data,
+    maintainers: maintainers
+  };
+}
+
+// function for getting the number of contributors from a GitHub repo
+async function fetchCollaboratorsCount(url: string): Promise<any[]> {
+  if (!url || !url.startsWith('https://api.github.com/repos/')) {
+    console.error("Invalid contributors count URL");
+    throw new Error("Invalid contributors count URL");
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+    const contributors = await response.json();
+    return contributors;
+  } catch (error) {
+    console.error("Error fetching collaborators data:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
 }
