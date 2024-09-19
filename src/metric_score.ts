@@ -28,8 +28,8 @@ export async function netScore(url: string): Promise<string> {
 
   // store intermediate scores
   let m_b: number = busFactorScore();
-  let m_c: number = correctnessScore();
-  let m_r: number = await rampUpScore(url);
+  let m_c: number = correctnessScore(data.issues);
+  let m_r: number = rampUpScore();
   let m_rm: number = responsivenessScore();
   let m_l: number = licenseScore(data);
 
@@ -66,74 +66,23 @@ function busFactorScore(): number {
 
 // analyzes reliability/quality of codebase
 // and returns M_c,normalized(r) as specified in project plan
-function correctnessScore(): number {
-  return -1;
+function correctnessScore(issueCount: number): number {
+  // Handle cases where issueCount is undefined or invalid (for NPM packages as well)
+  if (issueCount === undefined || issueCount === null) {
+    console.warn('Issue count is missing, defaulting to 0');
+    issueCount = 0;
+  }
+
+  const correctness = 1 / (1 + Math.log(1 + issueCount));
+
+  // Normalize the score to be between 0 and 1 and round to 2 decimal places
+  return parseFloat(correctness.toFixed(2));
 }
 
-// Analyzes presence and completeness of relevant documentation
+// analyzes presence and completness of relevant documentation
 // for new developers and return M_r(r) as specified in project plan
-async function rampUpScore(repoUrl: string): Promise<number> {
-    
-// Skip npm stuff
-  if (!repoUrl.includes("github.com")) {
-    console.log("Skipping: Not a GitHub URL");
-    return 0;
-  }
-
-  let documentationScore = 0;
-  let organizationScore = 0;
-  let setupScore = 0;
-  let testScore = 0;
-  let ciCdScore = 0;
-
-  try {
-    const files: File[] = await fetchRepoContents(repoUrl); // Changed `any` to `File[]`
-
-    // Here check for the presence of common files and directories, we can expand on this...
-
-    // Check for README.md
-    const readmeExists = files.some((file: File) => file.name.toLowerCase() === 'readme.md'); // Changed `any` to `File`
-    if (readmeExists) {
-      documentationScore += 1;
-    }
-
-    // Check for CONTRIBUTING.md
-    const contributingExists = files.some((file: File) => file.name.toLowerCase() === 'contributing.md'); // Changed `any` to `File`
-    if (contributingExists) {
-      documentationScore += 1;
-    }
-
-    // Check for src/ and test/ directories
-    const srcExists = files.some((file: File) => file.type === 'dir' && file.name.toLowerCase() === 'src'); // Changed `any` to `File`
-    const testExists = files.some((file: File) => file.type === 'dir' && file.name.toLowerCase() === 'test'); // Changed `any` to `File`
-    if (srcExists) organizationScore += 1;
-    if (testExists) organizationScore += 1;
-
-    // Check for package.json, requirements.txt, or similar
-    const setupFiles = ['package.json', 'requirements.txt', 'build.gradle', 'pom.xml'];
-    const setupFileExists = files.some((file: File) => setupFiles.includes(file.name.toLowerCase())); // Changed `any` to `File`
-    if (setupFileExists) {
-      setupScore += 1;
-    }
-
-    // Check for CI/CD config files like .travis.yml, .github/workflows/ci.yml, etc.
-    const ciCdFiles = ['.travis.yml', '.circleci/config.yml', '.github/workflows/ci.yml'];
-    const ciCdFileExists = files.some((file: File) => ciCdFiles.includes(file.name.toLowerCase())); // Changed `any` to `File`
-    if (ciCdFileExists) {
-      ciCdScore += 1;
-    }
-
-    // Total score calculation
-    const totalScore = documentationScore + organizationScore + setupScore + testScore + ciCdScore;
-    const maxPossibleScore = 8; 
-    const normalizedScore = totalScore / maxPossibleScore; // normalize
-
-    return normalizedScore;
-
-  } catch (error) {
-    console.error("Error fetching repository contents for ramp-up score:", error);
-    return 0;  // Default to 0 if there's an error
-  }
+function rampUpScore(): number {
+  return -1;
 }
 
 // Measures issue activity and frequency of closing issues
@@ -212,32 +161,4 @@ async function fetchNpmData(url: string) {
   // console.log("Response: ", response);
   // console.log("Data: ", data);
   return data;
-}
-
-// Interface for the file structure 
-interface File { 
-  name: string;
-  path: string;
-  type: 'file' | 'dir';
-}
-
-// Fetch repo contents
-async function fetchRepoContents(url: string): Promise<File[]> { 
-  const repoPath = url.split("github.com/")[1];
-  if (!repoPath) throw new Error("Invalid GitHub URL");
-
-  const [owner, repo] = repoPath.split("/");
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
-
-  try {
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.statusText}`);
-    }
-    const files: File[] = await response.json(); 
-    return files;  
-  } catch (error) {
-    console.error("Error fetching repository contents:", error);
-    throw error;
-  }
 }
