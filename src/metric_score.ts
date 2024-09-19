@@ -66,16 +66,19 @@ function busFactorScore(): number {
 
 // analyzes reliability/quality of codebase
 // and returns M_c,normalized(r) as specified in project plan
-function correctnessScore(issueCount: number): number {
-  // Handle cases where issueCount is undefined or invalid (for NPM packages as well)
-  if (issueCount === undefined || issueCount === null) {
-    console.warn('Issue count is missing, defaulting to 0');
-    issueCount = 0;
+function correctnessScore(IssueCount: number): number {
+  if (IssueCount === undefined || IssueCount === null) {
+    console.warn('Issue count is missing, returning correctness score of 0');
+    return 0; // No issue count present, return 0
   }
 
-  const correctness = 1 / (1 + Math.log(1 + issueCount));
+  // If there are 0 issues, return a perfect score of 1
+  if (IssueCount === 0) {
+    return 1;
+  }
 
-  // Normalize the score to be between 0 and 1 and round to 2 decimal places
+  const correctness = 1 / (1 + Math.log(1 + IssueCount));
+  
   return parseFloat(correctness.toFixed(2));
 }
 
