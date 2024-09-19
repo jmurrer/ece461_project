@@ -1,12 +1,13 @@
 // takes as input URL and returns a score
 export async function netScore(url: string): Promise<number> {
-  let data;
+  let data, openIssues, closedIssues;
 
   // fetch data from GitHub and npm APIs
   if (url.includes("github.com")) {
     console.log("Fetching GitHub data...");
     try {
       data = await fetchGitHubData(url);
+      [openIssues, closedIssues] = await fetchIssues(url);
     } catch (err) {
       console.error(err);
       throw new Error("Error fetching GitHub data");
@@ -23,13 +24,15 @@ export async function netScore(url: string): Promise<number> {
     console.log("Invalid URL");
     throw new Error("Invalid URL");
   }
-  console.log(data)
+  // console.log(data);
+  console.log(openIssues);
+  console.log(closedIssues);
 
   // store intermediate scores
   let m_b: number = busFactorScore();
   let m_c: number = correctnessScore();
   let m_r: number = rampUpScore();
-  let m_rm: number = responsivenessScore();
+  let m_rm: number = responsivenessScore(openIssues, closedIssues);
   let m_l: number = licenseScore();
 
   // store weights
@@ -63,8 +66,12 @@ function rampUpScore(): number {
 
 // Measures issue activity and frequency of closing issues
 // and returns M_rm,normalized(r) as specified in project plan
-function responsivenessScore(): number {
-  return -1;
+function responsivenessScore(openIssues, closedIssues): number {
+  let numOpenIssues = openIssues.length;
+  let numClosedIssues = closedIssues.length;
+
+  let score = (numClosedIssues / numOpenIssues) > 1 ? 1 : numClosedIssues / numOpenIssues;
+  return score;
 }
 
 function licenseScore(): number {
@@ -136,4 +143,40 @@ async function fetchNpmData(url: string) {
   console.log("Response: ", response);
   console.log("Data: ", data);
   return data;
+}
+
+// Define function to get issues data from GitHub URL (last 3 months)
+async function fetchIssues(url: string) {
+  const now = new Date();
+  now.setMonth(now.getMonth() - 3); // Subtract three months
+  const lastMonthDate = now.toISOString();
+
+  // Build query URLs
+  const repoPath = url.split("github.com/")[1];
+  if (!repoPath) {
+    throw new Error("Invalid GitHub URL");
+  }
+
+  // Ensure the repository path is in the format 'owner/repo'
+  const [owner, repo] = repoPath.split("/").map(part => part.trim());
+  if (!owner || !repo) {
+    throw new Error("Invalid GitHub repository path");
+  }
+
+  // Construct the GitHub API URLs for opened and close and still open issues
+  const openIssuesURL = `https://api.github.com/repos/${owner}/${repo}/issues?state=open&since=${lastMonthDate}`;
+  const closedIssuesURL = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&since=${lastMonthDate}`;
+
+  try {
+    const openResponse = await fetch(openIssuesURL);
+    const closedResponse = await fetch(closedIssuesURL);
+    console.log(closedResponse);
+
+    const openIssues = await openResponse.json();
+    const closedIssues = await closedResponse.json();
+
+    return [openIssues, closedIssues];
+  } catch (error) {
+    console.error('Error fetching issue data:', error);
+  }
 }
