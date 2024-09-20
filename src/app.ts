@@ -5,12 +5,11 @@ import * as path from 'path';
 async function processUrl(url:string) {
     try {
         const score = await ms.netScore(url);
-        console.log(url, ':');
-        console.log(score);
+        return {url, score: JSON.parse(score)};
     } catch (err) {
         console.error('Error processing ', url, ": ", err);
+        return { url, error: err.message };
     }
-    console.log("URL processed");
 }
 
 async function main() {
@@ -31,7 +30,13 @@ async function main() {
         const urls = fileContent.split('\n').filter(line => line.trim() !== '');
     
         // Process all URLs in parallel
-        await Promise.all(urls.map(url => processUrl(url)))
+        const results = await Promise.all(urls.map(url => processUrl(url)));
+
+        // Prep NDJSON output
+        const ndjsonOutput = results.map(result => JSON.stringify(result)).join('\n');
+
+        // print output to console
+        console.log(ndjsonOutput);
     } catch (err) {
         console.error('Error reading file: ', err);
     } finally {
