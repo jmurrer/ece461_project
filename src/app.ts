@@ -5,7 +5,7 @@ import * as path from 'path';
 async function processUrl(url:string) {
     try {
         const score = await ms.netScore(url);
-        console.log('Package analysis for ', url, ':');
+        console.log(url, ':');
         console.log(score);
     } catch (err) {
         console.error('Error processing ', url, ": ", err);

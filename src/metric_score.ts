@@ -1,5 +1,5 @@
 // takes as input URL and returns a score
-export async function netScore(url: string): Promise<number> {
+export async function netScore(url: string): Promise<string> {
   let data, openIssues, closedIssues;
 
   // fetch data from GitHub and npm APIs
@@ -14,7 +14,6 @@ export async function netScore(url: string): Promise<number> {
     }
   } else if (url.includes("npmjs.com")) {
     try {
-      // console.log("Fetching NPM data...");
       data = await fetchNpmData(url);
     } catch (err) {
       console.error(err);
@@ -24,8 +23,6 @@ export async function netScore(url: string): Promise<number> {
     console.error("Invalid URL");
     throw new Error("Invalid URL");
   }
-
-  // console.log(data)
 
   // structure for getting count (for bus factor) below
   let count;  // how many people are contributing to the repo (for bus factor)
@@ -47,12 +44,21 @@ export async function netScore(url: string): Promise<number> {
     throw new Error("No contributor or maintainer data available");
   }
 
-  // store intermediate scores
-  let m_b: number = busFactorScore(count);
-  let m_c: number = correctnessScore(data.issues);
-  let m_r: number = await rampUpScore(url);
-  let m_rm: number = responsivenessScore(openIssues, closedIssues);
-  let m_l: number = licenseScore(data);
+  // // store intermediate scores
+  // let m_b: number = busFactorScore(count);
+  // let m_c: number = correctnessScore(data.issues);
+  // let m_r: number = await rampUpScore(url);
+  // let m_rm: number = responsivenessScore(openIssues, closedIssues);
+  // let m_l: number = licenseScore(data);
+
+  // Calculate all metrics in parallel
+  const [m_b, m_c, m_r, m_rm, m_l] = await Promise.all([
+    busFactorScore(count),                       // Bus Factor Score
+    correctnessScore(data.issues),               // Correctness Score
+    rampUpScore(url),                            // Ramp Up Score
+    responsivenessScore(openIssues, closedIssues), // Responsiveness Score
+    licenseScore(data)                           // License Score
+  ]);
 
   // store weights
   let w_b: number = 0.2;
