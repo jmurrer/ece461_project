@@ -3,8 +3,24 @@ export async function netScore(url: string): Promise<string> {
   let data, openIssues, closedIssues;
 
   // fetch data from GitHub and npm APIs
-  if (url.includes("github.com")) {
-    // console.log("Fetching GitHub data...");
+  if (url.includes("npmjs.com")) {
+    try {
+      data = await fetchNpmData(url);
+      // console.log("NPM Repository: ", data.repository);
+      if (!data.repositoryUrl) {
+        console.error("No repository URL found in npm data");
+        return JSON.stringify({mainScore: -1 });
+      }
+
+      // Update NPM URL to Github URL
+      url = data.repositoryUrl;
+    }
+    catch (err) {
+      console.error(err);
+      throw new Error("Error fetching npm data");
+    }
+  }
+  
     try {
       data = await fetchGitHubData(url);
       [openIssues, closedIssues] = await fetchIssues(url);
@@ -12,17 +28,6 @@ export async function netScore(url: string): Promise<string> {
       console.error(err);
       throw new Error("Error fetching GitHub data");
     }
-  } else if (url.includes("npmjs.com")) {
-    try {
-      data = await fetchNpmData(url);
-    } catch (err) {
-      console.error(err);
-      throw new Error("Error fetching npm data");
-    }
-  } else {
-    console.error("Invalid URL");
-    throw new Error("Invalid URL");
-  }
 
   // structure for getting count (for bus factor) below
   let count;  // how many people are contributing to the repo (for bus factor)
@@ -269,11 +274,13 @@ async function fetchNpmData(url: string) {
   // console.log("Response: ", response);
   // console.log("NPM Data: ", data);
   const maintainers = data.maintainers ? data.maintainers.length : 0;
+  const repositoryUrl = data.repository ? data.repository.url : null;
   // console.log("maintainers NPM", maintainers)
 
   return {
     data,
-    maintainers: maintainers
+    maintainers: maintainers,
+    repositoryUrl: repositoryUrl
   };
 }
 
@@ -302,7 +309,7 @@ async function fetchIssues(url: string) {
   try {
     const openResponse = await fetch(openIssuesURL);
     const closedResponse = await fetch(closedIssuesURL);
-    console.log(closedResponse);
+    // console.log(closedResponse);
 
     const openIssues = await openResponse.json();
     const closedIssues = await closedResponse.json();
