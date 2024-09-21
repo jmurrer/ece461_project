@@ -7,8 +7,20 @@ if [ "$1" == "install" ]; then
 
 # ./run test
 elif [ "$1" == "test" ]; then
-  echo "Testing Node program"
-  npm start "test.txt"
+  output=$(npm run coverage)
+
+  # Extract the number of specs and failures
+  specs=$(echo "$output" | grep -oP '\d+ spec' | grep -oP '^\d+')
+  failures=$(echo "$output" | grep -oP '\d+ failures' | grep -oP '^\d+')
+
+  # Extract overall line coverage percentage
+  line_coverage=$(echo "$output" | grep -A1 'All files' | tail -n1 | awk -F'|' '{print $2}' | xargs)
+
+  # Print test outcomes
+  if [ -z "$specs" ]; then specs=0; fi
+  if [ -z "$failures" ]; then failures=0; fi
+  passed=$((specs - $failures))
+  echo "$passed/$specs test cases passed. $line_coverage achieved."
   exit 0 
 
 # ./run some text file

@@ -12,14 +12,15 @@ async function processUrl(url:string) {
     }
 }
 
-async function main() {
+export async function main(testFile?: string) {
     // check if filename provided
-    if (process.argv.length < 3) {
+    if (process.argv.length < 3 && !testFile) {
         console.error('Usage: npm start <filename>');
         process.exit(1);
     }
 
-    const filename = process.argv[2];
+    const filename = testFile ? testFile : process.argv[2];
+    let ndjsonOutput;
 
     try {
         // read file content
@@ -33,15 +34,23 @@ async function main() {
         const results = await Promise.all(urls.map(url => processUrl(url)));
 
         // Prep NDJSON output
-        const ndjsonOutput = results.map(result => JSON.stringify(result)).join('\n');
+        ndjsonOutput = results.map(result => JSON.stringify(result)).join('\n');
 
         // print output to console
         console.log(ndjsonOutput);
     } catch (err) {
         console.error('Error reading file: ', err);
     } finally {
-        process.exit(0);
+        if (testFile) {
+            return ndjsonOutput;
+        }
+        else {
+            process.exit(0);
+        }
     }
 }
 
-main();
+// Only call main if this file is being run directly outside of Jasmine
+if (!process.argv[1].endsWith('jasmine.js') && !process.argv[1].endsWith('jasmine')) {
+    main();
+}
