@@ -1,15 +1,15 @@
-import * as ms from './metric_score.js';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import * as ms from "./metric_score.js";
+import * as fs from "fs/promises";
+import * as path from "path";
 
-async function processUrl(url:string) {
-    try {
-        const score = await ms.netScore(url);
-        return {url, score: JSON.parse(score)};
-    } catch (err) {
-        console.error('Error processing ', url, ": ", err);
-        return { url, error: err.message };
-    }
+async function processUrl(url: string) {
+  try {
+    const score = await ms.netScore(url);
+    return { url, score: JSON.parse(score) };
+  } catch (err) {
+    console.error("Error processing ", url, ": ", err);
+    return { url, error: err.message };
+  }
 }
 
 export async function main(testFile?: string) {
@@ -48,6 +48,7 @@ export async function main(testFile?: string) {
             process.exit(0);
         }
     }
+
 }
 
 // Only call main if this file is being run directly outside of Jasmine
