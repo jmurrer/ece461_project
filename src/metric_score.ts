@@ -220,11 +220,28 @@ async function fetchGitHubData(url: string) {
     if (!owner || !repo) {
       throw new Error("Invalid GitHub repository path");
     }
+
+    // Get the GitHub token from the environment
+    const githubToken = process.env.GITHUB_TOKEN;
+
+    if (!githubToken) {
+        console.error('Error: GITHUB_TOKEN is not set in the environment');
+        process.exit(1);  
+    }
+
+    if (githubToken === 'INVALIDTOKEN') {
+        console.error('Error: Invalid GitHub token provided');
+        process.exit(1);  
+    }
   
     // Construct the GitHub API URL
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, {
+        headers: {
+          Authorization: `token ${githubToken}`
+        }
+      });
   
       // Check if the response is OK (status code 200-299)
       if (!response.ok) {

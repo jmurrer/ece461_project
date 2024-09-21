@@ -31,3 +31,5 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# .env file
+.env
