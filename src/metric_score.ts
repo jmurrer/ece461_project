@@ -9,32 +9,34 @@ export async function netScore(url: string): Promise<string> {
       // console.log("NPM Repository: ", data.repository);
       if (!data.repositoryUrl) {
         console.error("No repository URL found in npm data");
-        return JSON.stringify({mainScore: -1 });
+        return JSON.stringify({ mainScore: -1 });
       }
 
       // Update NPM URL to Github URL
       url = data.repositoryUrl;
-    }
-    catch (err) {
+    } catch (err) {
       console.error(err);
       throw new Error("Error fetching npm data");
     }
   }
-  
-    try {
-      data = await fetchGitHubData(url);
-      [openIssues, closedIssues] = await fetchIssues(url);
-    } catch (err) {
-      console.error(err);
-      throw new Error("Error fetching GitHub data");
-    }
+
+  try {
+    data = await fetchGitHubData(url);
+    [openIssues, closedIssues] = await fetchIssues(url);
+  } catch (err) {
+    console.error(err);
+    throw new Error("Error fetching GitHub data");
+  }
 
   // structure for getting count (for bus factor) below
-  let count;  // how many people are contributing to the repo (for bus factor)
-  if (data.contributors_count || data.maintainers) {  // contributors for github and maintainers for npm
+  let count; // how many people are contributing to the repo (for bus factor)
+  if (data.contributors_count || data.maintainers) {
+    // contributors for github and maintainers for npm
     try {
       if (data.contributors_count) {
-        const contributors = await fetchCollaboratorsCount(data.contributors_count);  // have to process the contributors url for GitHub
+        const contributors = await fetchCollaboratorsCount(
+          data.contributors_count
+        ); // have to process the contributors url for GitHub
         count = contributors.length;
       } else {
         count = data.maintainers;
@@ -58,11 +60,11 @@ export async function netScore(url: string): Promise<string> {
 
   // Calculate all metrics in parallel
   const [m_b, m_c, m_r, m_rm, m_l] = await Promise.all([
-    busFactorScore(count),                       // Bus Factor Score
-    correctnessScore(data.issues),               // Correctness Score
-    rampUpScore(url),                            // Ramp Up Score
+    busFactorScore(count), // Bus Factor Score
+    correctnessScore(data.issues), // Correctness Score
+    rampUpScore(url), // Ramp Up Score
     responsivenessScore(openIssues, closedIssues), // Responsiveness Score
-    licenseScore(data)                           // License Score
+    licenseScore(data), // License Score
   ]);
 
   // store weights
@@ -73,8 +75,9 @@ export async function netScore(url: string): Promise<string> {
   let w_l: number = 0.1;
 
   // calculate score
-  let mainScore: number =  w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
-  
+  let mainScore: number =
+    w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
+
   // construct result object, JSONify, then return
   const result = {
     mainScore: mainScore,
@@ -83,8 +86,8 @@ export async function netScore(url: string): Promise<string> {
       correctness: { score: m_c, weight: w_c },
       rampUp: { score: m_r, weight: w_r },
       responsiveness: { score: m_rm, weight: w_rm },
-      license: { score: m_l, weight: w_l }
-    }
+      license: { score: m_l, weight: w_l },
+    },
   };
 
   return JSON.stringify(result, null, 2);
@@ -95,11 +98,11 @@ export async function netScore(url: string): Promise<string> {
 function busFactorScore(contributorsCount: number): number {
   let busFactorScore;
 
-    // each comparison is to a number of contributors that has ranges of safe,moderate, low, and very low
+  // each comparison is to a number of contributors that has ranges of safe,moderate, low, and very low
   if (contributorsCount >= 10) {
     busFactorScore = 10;
   } else if (contributorsCount >= 5) {
-    busFactorScore = 7;   
+    busFactorScore = 7;
   } else if (contributorsCount >= 2) {
     busFactorScore = 4;
   } else {
@@ -113,7 +116,7 @@ function busFactorScore(contributorsCount: number): number {
 // and returns M_c,normalized(r) as specified in project plan
 function correctnessScore(IssueCount: number): number {
   if (IssueCount === undefined || IssueCount === null) {
-    console.warn('Issue count is missing, returning correctness score of 0');
+    console.warn("Issue count is missing, returning correctness score of 0");
     return 0; // No issue count present, return 0
   }
 
@@ -123,7 +126,7 @@ function correctnessScore(IssueCount: number): number {
   }
 
   const correctness = 1 / (1 + Math.log(1 + IssueCount));
-  
+
   return parseFloat(correctness.toFixed(2));
 }
 
@@ -148,47 +151,75 @@ async function rampUpScore(repoUrl: string): Promise<number> {
     // Here check for the presence of common files and directories, we can expand on this...
 
     // Check for README.md
-    const readmeExists = files.some((file: File) => file.name.toLowerCase() === 'readme.md'); // Changed `any` to `File`
+    const readmeExists = files.some(
+      (file: File) => file.name.toLowerCase() === "readme.md"
+    ); // Changed `any` to `File`
     if (readmeExists) {
       documentationScore += 1;
     }
 
     // Check for CONTRIBUTING.md
-    const contributingExists = files.some((file: File) => file.name.toLowerCase() === 'contributing.md'); // Changed `any` to `File`
+    const contributingExists = files.some(
+      (file: File) => file.name.toLowerCase() === "contributing.md"
+    ); // Changed `any` to `File`
     if (contributingExists) {
       documentationScore += 1;
     }
 
     // Check for src/ and test/ directories
-    const srcExists = files.some((file: File) => file.type === 'dir' && file.name.toLowerCase() === 'src'); // Changed `any` to `File`
-    const testExists = files.some((file: File) => file.type === 'dir' && file.name.toLowerCase() === 'test'); // Changed `any` to `File`
+    const srcExists = files.some(
+      (file: File) => file.type === "dir" && file.name.toLowerCase() === "src"
+    ); // Changed `any` to `File`
+    const testExists = files.some(
+      (file: File) => file.type === "dir" && file.name.toLowerCase() === "test"
+    ); // Changed `any` to `File`
     if (srcExists) organizationScore += 1;
     if (testExists) organizationScore += 1;
 
     // Check for package.json, requirements.txt, or similar
-    const setupFiles = ['package.json', 'requirements.txt', 'build.gradle', 'pom.xml'];
-    const setupFileExists = files.some((file: File) => setupFiles.includes(file.name.toLowerCase())); // Changed `any` to `File`
+    const setupFiles = [
+      "package.json",
+      "requirements.txt",
+      "build.gradle",
+      "pom.xml",
+    ];
+    const setupFileExists = files.some((file: File) =>
+      setupFiles.includes(file.name.toLowerCase())
+    ); // Changed `any` to `File`
     if (setupFileExists) {
       setupScore += 1;
     }
 
     // Check for CI/CD config files like .travis.yml, .github/workflows/ci.yml, etc.
-    const ciCdFiles = ['.travis.yml', '.circleci/config.yml', '.github/workflows/ci.yml'];
-    const ciCdFileExists = files.some((file: File) => ciCdFiles.includes(file.name.toLowerCase())); // Changed `any` to `File`
+    const ciCdFiles = [
+      ".travis.yml",
+      ".circleci/config.yml",
+      ".github/workflows/ci.yml",
+    ];
+    const ciCdFileExists = files.some((file: File) =>
+      ciCdFiles.includes(file.name.toLowerCase())
+    ); // Changed `any` to `File`
     if (ciCdFileExists) {
       ciCdScore += 1;
     }
 
     // Total score calculation
-    const totalScore = documentationScore + organizationScore + setupScore + testScore + ciCdScore;
-    const maxPossibleScore = 8; 
+    const totalScore =
+      documentationScore +
+      organizationScore +
+      setupScore +
+      testScore +
+      ciCdScore;
+    const maxPossibleScore = 8;
     const normalizedScore = totalScore / maxPossibleScore; // normalize
 
     return normalizedScore;
-
   } catch (error) {
-    console.error("Error fetching repository contents for ramp-up score:", error);
-    return 0;  // Default to 0 if there's an error
+    console.error(
+      "Error fetching repository contents for ramp-up score:",
+      error
+    );
+    return 0; // Default to 0 if there's an error
   }
 }
 
@@ -198,7 +229,8 @@ function responsivenessScore(openIssues, closedIssues): number {
   let numOpenIssues = openIssues.length;
   let numClosedIssues = closedIssues.length;
 
-  let score = (numClosedIssues / numOpenIssues) > 1 ? 1 : numClosedIssues / numOpenIssues;
+  let score =
+    numClosedIssues / numOpenIssues > 1 ? 1 : numClosedIssues / numOpenIssues;
   return score;
 }
 
@@ -209,67 +241,66 @@ function licenseScore(data: any): number {
 
 // Define a function to fetch data from the GitHub API
 async function fetchGitHubData(url: string) {
-    // Extract the repository owner and name from the URL
-    const repoPath = url.split("github.com/")[1];
-    if (!repoPath) {
-      throw new Error("Invalid GitHub URL");
-    }
-  
-    // Ensure the repository path is in the format 'owner/repo'
-    const [owner, repo] = repoPath.split("/").map(part => part.trim());
-    if (!owner || !repo) {
-      throw new Error("Invalid GitHub repository path");
+  // Extract the repository owner and name from the URL
+  const repoPath = url.split("github.com/")[1];
+  if (!repoPath) {
+    throw new Error("Invalid GitHub URL");
+  }
+
+  // Ensure the repository path is in the format 'owner/repo'
+  const [owner, repo] = repoPath.split("/").map((part) => part.trim());
+  if (!owner || !repo) {
+    throw new Error("Invalid GitHub repository path");
+  }
+
+  // Get the GitHub token from the environment
+  const githubToken = process.env.GITHUB_TOKEN;
+
+  if (!githubToken) {
+    console.error("Error: GITHUB_TOKEN is not set in the environment");
+    process.exit(1);
+  }
+
+  if (githubToken === "INVALIDTOKEN") {
+    console.error("Error: Invalid GitHub token provided");
+    process.exit(1);
+  }
+
+  // Construct the GitHub API URL
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+  try {
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${githubToken}`,
+      },
+    });
+
+    // Check if the response is OK (status code 200-299)
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
     }
 
-    // Get the GitHub token from the environment
-    const githubToken = process.env.GITHUB_TOKEN;
+    // Parse the JSON response
+    const data = await response.json();
 
-    if (!githubToken) {
-        console.error('Error: GITHUB_TOKEN is not set in the environment');
-        process.exit(1);  
-    }
+    // Optionally, you can log or process the data here
+    // console.log("Fetched GitHub Data:", data);
 
-    if (githubToken === 'INVALIDTOKEN') {
-        console.error('Error: Invalid GitHub token provided');
-        process.exit(1);  
-    }
-  
-    // Construct the GitHub API URL
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-    try {
-      const response = await fetch(apiUrl, {
-        headers: {
-          Authorization: `token ${githubToken}`
-        }
-      });
-  
-      // Check if the response is OK (status code 200-299)
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.statusText}`);
-      }
-  
-      // Parse the JSON response
-      const data = await response.json();
-  
-      // Optionally, you can log or process the data here
-      // console.log("Fetched GitHub Data:", data);
-  
-      // Extract relevant information if needed
-      const result = {
-        stars: data.stargazers_count,
-        forks: data.forks_count,
-        issues: data.open_issues_count,
-        license: data.license ? data.license.name : 'No license',
-        updated_at: data.updated_at,
-        contributors_count: data.contributors_url
-      };
-  
-      return result;
-  
-    } catch (error) {
-      console.error("Error fetching GitHub data:", error);
-      throw error; // Re-throw the error to be handled by the caller
-    }
+    // Extract relevant information if needed
+    const result = {
+      stars: data.stargazers_count,
+      forks: data.forks_count,
+      issues: data.open_issues_count,
+      license: data.license ? data.license.name : "No license",
+      updated_at: data.updated_at,
+      contributors_count: data.contributors_url,
+    };
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching GitHub data:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
 }
 
 // Define a function to fetch data from the npm API
@@ -297,7 +328,7 @@ async function fetchNpmData(url: string) {
   return {
     data,
     maintainers: maintainers,
-    repositoryUrl: repositoryUrl
+    repositoryUrl: repositoryUrl,
   };
 }
 
@@ -314,7 +345,7 @@ async function fetchIssues(url: string) {
   }
 
   // Ensure the repository path is in the format 'owner/repo'
-  const [owner, repo] = repoPath.split("/").map(part => part.trim());
+  const [owner, repo] = repoPath.split("/").map((part) => part.trim());
   if (!owner || !repo) {
     throw new Error("Invalid GitHub repository path");
   }
@@ -333,13 +364,13 @@ async function fetchIssues(url: string) {
 
     return [openIssues, closedIssues];
   } catch (error) {
-    console.error('Error fetching issue data:', error);
+    console.error("Error fetching issue data:", error);
   }
 }
 
 // function for getting the number of contributors from a GitHub repo
 async function fetchCollaboratorsCount(url: string): Promise<any[]> {
-  if (!url || !url.startsWith('https://api.github.com/repos/')) {
+  if (!url || !url.startsWith("https://api.github.com/repos/")) {
     console.error("Invalid contributors count URL");
     throw new Error("Invalid contributors count URL");
   }
@@ -358,7 +389,7 @@ async function fetchCollaboratorsCount(url: string): Promise<any[]> {
 }
 
 // Fetch repo contents
-async function fetchRepoContents(url: string): Promise<File[]> { 
+async function fetchRepoContents(url: string): Promise<File[]> {
   const repoPath = url.split("github.com/")[1];
   if (!repoPath) throw new Error("Invalid GitHub URL");
 
@@ -370,8 +401,8 @@ async function fetchRepoContents(url: string): Promise<File[]> {
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.statusText}`);
     }
-    const files: File[] = await response.json(); 
-    return files;  
+    const files: File[] = await response.json();
+    return files;
   } catch (error) {
     console.error("Error fetching repository contents:", error);
     throw error;
