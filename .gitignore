@@ -26,6 +26,8 @@ bower_components/
 
 # Testing
 coverage/
+.nyc_output
+instrumented/
 
 # Miscellaneous
 .DS_Store
