@@ -13,7 +13,7 @@ export async function netScore(url: string): Promise<string> {
       }
 
       // Update NPM URL to Github URL
-      url = data.repositoryUrl;
+      url = data.repositoryUrl.replace("git+", "").replace(".git", "");
     } catch (err) {
       console.error(err);
       throw new Error("Error fetching npm data");
