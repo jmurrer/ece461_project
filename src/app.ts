@@ -5,22 +5,25 @@ import { info, debug, silent } from "./logger.js";
 
 async function processUrl(url: string) {
   try {
+    const startTime = Date.now();
     const score = await ms.netScore(url);
+    const netScoreLatency = Date.now() - startTime; // overall Netscore Latency
+
     await info(`Processed URL: ${url}, Score: ${score}`);
     let ret = {
       URL: url,
-      NetScore: score.NET_SCORE,
-      RampUp: score.RAMP_UP_SCORE,
-      Correctness: score.CORRECTNESS_SCORE,
-      BusFactor: score.BUS_FACTOR_SCORE,
-      ResponsiveMaintainer: score.RESPONSIVE_MAINTAINER_SCORE,
-      License: score.LICENSE_SCORE,
-      NetScore_Latency: 0,
-      RampUp_Latency: 0,
-      Correctness_Latency: 0,
-      BusFactor_Latency: 0,
-      ResponsiveMaintainer_Latency: 0,
-      License_Latency: 0,
+      NetScore: score.NetScore,
+      RampUp: score.RampUp,
+      Correctness: score.Correctness,
+      BusFactor: score.BusFactor,
+      ResponsiveMaintainer: score.ResponsiveMaintainer,
+      License: score.License,
+      NetScore_Latency: netScoreLatency,
+      RampUp_Latency: score.RampUp_Latency,
+      Correctness_Latency: score.Correctness_Latency,
+      BusFactor_Latency: score.BusFactor_Latency,
+      ResponsiveMaintainer_Latency: score.ResponsiveMaintainer_Latency,
+      License_Latency: score.License_Latency,
     };
     return ret;
   } catch (err) {

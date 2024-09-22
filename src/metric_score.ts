@@ -1,5 +1,14 @@
 import { info, debug, silent } from "./logger.js";
 
+// Function to calculate score and latency for each metric
+const measureLatency = async (fn: () => Promise<any>, label: string) => {
+  const start = Date.now();
+  const score = await fn();
+  const latency = Date.now() - start;
+  console.log(`Metric: ${label}, Score: ${score}, Latency: ${latency}`);
+  return { score, latency, label };
+};
+
 // takes as input URL and returns a score
 export async function netScore(url: string): Promise<any> {
   let data, openIssues, closedIssues;
@@ -67,13 +76,17 @@ export async function netScore(url: string): Promise<any> {
   }
 
   // Calculate all metrics in parallel
-  const [m_b, m_c, m_r, m_rm, m_l] = await Promise.all([
-    busFactorScore(count), // Bus Factor Score
-    correctnessScore(data.issues), // Correctness Score
-    rampUpScore(url), // Ramp Up Score
-    responsivenessScore(openIssues, closedIssues), // Responsiveness Score
-    licenseScore(data), // License Score
-  ]);
+  const [BusFactor, Correctness, RampUp, ResponsiveMaintainer, License] =
+    await Promise.all([
+      measureLatency(() => busFactorScore(count), "BusFactor"), // Bus Factor Score
+      measureLatency(() => correctnessScore(data.issues), "Correctness"), // Correctness Score
+      measureLatency(() => rampUpScore(url), "RampUp"), // Ramp Up Score
+      measureLatency(
+        () => responsivenessScore(openIssues, closedIssues),
+        "ResponsiveMaintainer"
+      ), // Responsiveness Score
+      measureLatency(() => licenseScore(data), "License"), // License Score
+    ]);
 
   // store weights
   let w_b: number = 0.2;
@@ -83,27 +96,39 @@ export async function netScore(url: string): Promise<any> {
   let w_l: number = 0.1;
 
   // calculate score
-  let mainScore: number =
-    w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
-  mainScore = parseFloat(mainScore.toFixed(2));
+  let netScore: number =
+    w_b * BusFactor.score +
+    w_c * Correctness.score +
+    w_r * RampUp.score +
+    w_rm * ResponsiveMaintainer.score +
+    w_l * License.score;
+  netScore = parseFloat(netScore.toFixed(2));
 
   // construct result object, JSONify, then return
   const result = {
-    NET_SCORE: mainScore,
-    RAMP_UP_SCORE: m_r,
-    CORRECTNESS_SCORE: m_c,
-    BUS_FACTOR_SCORE: m_b,
-    RESPONSIVE_MAINTAINER_SCORE: m_rm,
-    LICENSE_SCORE: m_l,
+    NetScore: netScore,
+    RampUp: RampUp.score,
+    Correctness: Correctness.score,
+    BusFactor: BusFactor.score,
+    ResponsiveMaintainer: ResponsiveMaintainer.score,
+    License: License.score,
+    RampUp_Latency: RampUp.latency,
+    Correctness_Latency: Correctness.latency,
+    BusFactor_Latency: BusFactor.latency,
+    ResponsiveMaintainer_Latency: ResponsiveMaintainer.latency,
+    License_Latency: License.latency,
   };
 
-  await info(`Processed URL: ${url}, Score: ${mainScore}`);
+  await info(`Processed URL: ${url}, Score: ${netScore}`);
+  await info(`Result: ${JSON.stringify(result)}`);
   return result;
 }
 
 // analyzes bus factor and returns M_b(r) as specified
 // in project plan
-export function busFactorScore(contributorsCount: number): number {
+export async function busFactorScore(
+  contributorsCount: number
+): Promise<number> {
   let busFactorScore;
 
   // each comparison is to a number of contributors that has ranges of safe,moderate, low, and very low
@@ -224,7 +249,10 @@ export async function rampUpScore(repoUrl: string): Promise<number> {
 
 // Measures issue activity and frequency of closing issues
 // and returns M_rm,normalized(r) as specified in project plan
-export function responsivenessScore(openIssues, closedIssues): number {
+export async function responsivenessScore(
+  openIssues,
+  closedIssues
+): Promise<number> {
   let numOpenIssues = openIssues.length;
   let numClosedIssues = closedIssues.length;
 
@@ -233,7 +261,7 @@ export function responsivenessScore(openIssues, closedIssues): number {
   return score ? score : 0;
 }
 
-export function licenseScore(data: any): number {
+export async function licenseScore(data: any): Promise<number> {
   // List of licenses that are compatible with LGPL 2.0
   const compatibleLicenses = [
     "GNU General Public License v2.0",
