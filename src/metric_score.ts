@@ -84,6 +84,7 @@ export async function netScore(url: string): Promise<string> {
   // calculate score
   let mainScore: number =
     w_b * m_b + w_c * m_c + w_r * m_r + w_rm * m_rm + w_l * m_l;
+  mainScore = parseFloat(mainScore.toFixed(2));
 
   // construct result object, JSONify, then return
   const result = {
@@ -238,18 +239,15 @@ function responsivenessScore(openIssues, closedIssues): number {
 function licenseScore(data: any): number {
   // List of licenses that are compatible with LGPL 2.0
   const compatibleLicenses = [
-    "LGPL-2.0",
-    "LGPL-2.1",
-    "LGPL-3.0",
-    "MIT",
-    "Apache-2.0",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "ISC",
-    // Add more compatible licenses as needed
+    "GNU General Public License v2.0",
+    "GNU General Public License v3.0",
+    "GNU Lesser General Public License v2.1",
+    "GNU Lesser General Public License v3.0",
+    "MIT License",
+    "ISC License",
   ];
 
-  // Check if the license exists and if it is compatible
+  // Check if the license exists and if it is compatible with LGPL 2.1
   if (data.license && compatibleLicenses.includes(data.license)) {
     return 1; // License is present and compatible
   }
@@ -288,11 +286,10 @@ async function fetchGitHubData(url: string) {
       },
     });
 
-    // Check if the response indicates invalid token (401 Unauthorized)
     if (response.status === 401) {
-        throw new Error("Invalid GitHub token provided. Please check your token.");
-        process.exit(1); // yielding to rc1
-      }
+      throw new Error("Invalid GitHub token provided. Please check your token.");
+      process.exit(1); // yielding to rc1
+    }
 
     // Check if the response is OK (status code 200-299)
     if (!response.ok) {
