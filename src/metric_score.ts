@@ -141,12 +141,6 @@ function correctnessScore(IssueCount: number): number {
 // analyzes presence and completness of relevant documentation
 // for new developers and return M_r(r) as specified in project plan
 async function rampUpScore(repoUrl: string): Promise<number> {
-  // Skip npm stuff
-  if (!repoUrl.includes("github.com")) {
-    console.log("Skipping: Not a GitHub URL");
-    return 0;
-  }
-
   let documentationScore = 0;
   let organizationScore = 0;
   let setupScore = 0;
@@ -157,7 +151,6 @@ async function rampUpScore(repoUrl: string): Promise<number> {
     const files: File[] = await fetchRepoContents(repoUrl); // Changed `any` to `File[]`
 
     // Here check for the presence of common files and directories, we can expand on this...
-
     // Check for README.md
     const readmeExists = files.some(
       (file: File) => file.name.toLowerCase() === "readme.md"
@@ -243,8 +236,25 @@ function responsivenessScore(openIssues, closedIssues): number {
 }
 
 function licenseScore(data: any): number {
-  // returns 1 if license is present, 0 otherwise
-  return data.license ? 1 : 0;
+  // List of licenses that are compatible with LGPL 2.0
+  const compatibleLicenses = [
+    "LGPL-2.0",
+    "LGPL-2.1",
+    "LGPL-3.0",
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    // Add more compatible licenses as needed
+  ];
+
+  // Check if the license exists and if it is compatible
+  if (data.license && compatibleLicenses.includes(data.license)) {
+    return 1; // License is present and compatible
+  }
+
+  return 0; // No compatible license found
 }
 
 // Define a function to fetch data from the GitHub API
