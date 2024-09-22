@@ -1,1 +1,1 @@
-{"URL":"https://www.npmjs.com/package/react","NET_SCORE":0.69,"RAMP_UP_SCORE":0.375,"CORRECTNESS_SCORE":0.13,"BUS_FACTOR_SCORE":1,"RESPONSIVE_MAINTAINER_SCORE":1,"LICENSE_SCORE":1}
+{"URL":"https://www.npmjs.com/package/react","NetScore":0.69,"RampUp":0.375,"Correctness":0.13,"BusFactor":1,"ResponsiveMaintainer":1,"License":1,"NetScore_Latency":0,"RampUp_Latency":0,"Correctness_Latency":0,"BusFactor_Latency":0,"ResponsiveMaintainer_Latency":0,"License_Latency":0}

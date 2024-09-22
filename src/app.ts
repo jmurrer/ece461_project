@@ -9,17 +9,23 @@ async function processUrl(url: string) {
     await info(`Processed URL: ${url}, Score: ${score}`);
     let ret = {
       URL: url,
-      NET_SCORE: score.NET_SCORE,
-      RAMP_UP_SCORE: score.RAMP_UP_SCORE,
-      CORRECTNESS_SCORE: score.CORRECTNESS_SCORE,
-      BUS_FACTOR_SCORE: score.BUS_FACTOR_SCORE,
-      RESPONSIVE_MAINTAINER_SCORE: score.RESPONSIVE_MAINTAINER_SCORE,
-      LICENSE_SCORE: score.LICENSE_SCORE,
+      NetScore: score.NET_SCORE,
+      RampUp: score.RAMP_UP_SCORE,
+      Correctness: score.CORRECTNESS_SCORE,
+      BusFactor: score.BUS_FACTOR_SCORE,
+      ResponsiveMaintainer: score.RESPONSIVE_MAINTAINER_SCORE,
+      License: score.LICENSE_SCORE,
+      NetScore_Latency: 0,
+      RampUp_Latency: 0,
+      Correctness_Latency: 0,
+      BusFactor_Latency: 0,
+      ResponsiveMaintainer_Latency: 0,
+      License_Latency: 0,
     };
     return ret;
   } catch (err) {
     await silent(`Error processing ${url}: ${err.message}`);
-    return { URL: url, NET_SCORE: -1 };
+    return { URL: url, NetScore: -1 };
   }
 }
 

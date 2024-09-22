@@ -20,11 +20,14 @@ elif [ "$1" == "test" ]; then
   # Extract overall line coverage percentage
   line_coverage=$(echo "$output" | awk '/All files/{print $10}' | xargs)
 
+  # round line coverage to nearest integer
+  line_coverage=$(echo "($line_coverage + 0.5)/1" | bc)
+
   # Print test outcomes
   if [ -z "$specs" ]; then specs=0; fi
   if [ -z "$failures" ]; then failures=0; fi
   passed=$((specs - failures))
-  echo "$passed/$specs test cases passed. $line_coverage% coverage achieved."
+  echo "$passed/$specs test cases passed. $line_coverage% line coverage achieved."
   exit 0 
 
 # ./run some text file
