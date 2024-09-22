@@ -232,7 +232,7 @@ function responsivenessScore(openIssues, closedIssues): number {
 
   let score =
     numClosedIssues / numOpenIssues > 1 ? 1 : numClosedIssues / numOpenIssues;
-  return score;
+  return score ? score : 0;
 }
 
 function licenseScore(data: any): number {

@@ -1,1 +1,1 @@
-{"url":"https://github.com/prathameshnetake/libvlc","score":{"mainScore":null,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.25,"responsiveness":null,"license":1}}}
+{"url":"https://github.com/prathameshnetake/libvlc","score":{"mainScore":0.3075,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.25,"responsiveness":0,"license":0}}}
