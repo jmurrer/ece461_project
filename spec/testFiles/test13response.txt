@@ -1,1 +1,1 @@
-{"url":"fakeurl.com","mainScore":-1"}
+{"url":"fakeurl.com","mainScore":-1}

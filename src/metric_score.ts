@@ -1,3 +1,5 @@
+import { info, debug, silent } from "./logger.js";
+
 // takes as input URL and returns a score
 export async function netScore(url: string): Promise<string> {
   let data, openIssues, closedIssues;
@@ -22,14 +24,14 @@ export async function netScore(url: string): Promise<string> {
       const repo: string = repoURL ? repoURL.repository.url : null;
 
       if (!repo) {
-        console.error("No repository URL found in npm data");
+        await silent("No repository URL found in npm data");
         return JSON.stringify({ mainScore: -1 });
       }
 
       // Update to Github URL
       url = repo.replace("git+", "").replace(".git", "");
     } catch (err) {
-      console.error(err);
+      await silent("Error fetching npm data");
       throw new Error("Error fetching npm data");
     }
   }
@@ -38,7 +40,7 @@ export async function netScore(url: string): Promise<string> {
     data = await fetchGitHubData(url);
     [openIssues, closedIssues] = await fetchIssues(url);
   } catch (err) {
-    console.error(err);
+    await silent("Error fetching GitHub data");
     throw new Error("Error fetching GitHub data");
   }
 
@@ -55,13 +57,12 @@ export async function netScore(url: string): Promise<string> {
       } else {
         count = data.maintainers;
       }
-      // console.log("contributors/maintainers: ", count);
     } catch (err) {
-      console.error("Error fetching contributors/maintainers:", err);
+      await silent("Error fetching contributors/maintainers");
       throw new Error("Error fetching contributors/maintainers");
     }
   } else {
-    console.error("No contributor or maintainer data available");
+    await silent("No contributor or maintainer data available");
     throw new Error("No contributor or maintainer data available");
   }
 
@@ -98,6 +99,7 @@ export async function netScore(url: string): Promise<string> {
     },
   };
 
+  await info(`Processed URL: ${url}, Score: ${mainScore}`);
   return JSON.stringify(result, null, 2);
 }
 
@@ -123,9 +125,9 @@ function busFactorScore(contributorsCount: number): number {
 
 // analyzes reliability/quality of codebase
 // and returns M_c,normalized(r) as specified in project plan
-function correctnessScore(IssueCount: number): number {
+async function correctnessScore(IssueCount: number): Promise<number> {
   if (IssueCount === undefined || IssueCount === null) {
-    console.warn("Issue count is missing, returning correctness score of 0");
+    await silent("Issue count is missing, returning correctness score of 0");
     return 0; // No issue count present, return 0
   }
 
@@ -217,10 +219,7 @@ async function rampUpScore(repoUrl: string): Promise<number> {
 
     return normalizedScore;
   } catch (error) {
-    console.error(
-      "Error fetching repository contents for ramp-up score:",
-      error
-    );
+    await silent("Error fetching repository contents for ramp-up score");
     return 0; // Default to 0 if there's an error
   }
 }
@@ -273,12 +272,12 @@ async function fetchGitHubData(url: string) {
   const githubToken = process.env.GITHUB_TOKEN;
 
   if (!githubToken) {
-    console.error("Error: GITHUB_TOKEN is not set in the environment");
+    throw new Error("GITHUB_TOKEN is not set in the environment");
     process.exit(1);
   }
 
   if (githubToken === "INVALIDTOKEN") {
-    console.error("Error: Invalid GitHub token provided");
+    throw new Error("Invalid GitHub token provided");
     process.exit(1);
   }
 
@@ -311,7 +310,6 @@ async function fetchGitHubData(url: string) {
 
     return result;
   } catch (error) {
-    console.error("Error fetching GitHub data:", error);
     throw error; // Re-throw the error to be handled by the caller
   }
 }
@@ -355,14 +353,13 @@ async function fetchIssues(url: string) {
 
     return [openIssues, closedIssues];
   } catch (error) {
-    console.error("Error fetching issue data:", error);
+    throw error; // Re-throw the error to be handled by the caller
   }
 }
 
 // function for getting the number of contributors from a GitHub repo
 async function fetchCollaboratorsCount(url: string): Promise<any[]> {
   if (!url || !url.startsWith("https://api.github.com/repos/")) {
-    console.error("Invalid contributors count URL");
     throw new Error("Invalid contributors count URL");
   }
 
@@ -378,7 +375,6 @@ async function fetchCollaboratorsCount(url: string): Promise<any[]> {
     const contributors = await response.json();
     return contributors;
   } catch (error) {
-    console.error("Error fetching collaborators data:", error);
     throw error; // Re-throw the error to be handled by the caller
   }
 }
@@ -403,7 +399,6 @@ async function fetchRepoContents(url: string): Promise<File[]> {
     const files: File[] = await response.json();
     return files;
   } catch (error) {
-    console.error("Error fetching repository contents:", error);
     throw error;
   }
 }

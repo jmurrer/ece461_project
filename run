@@ -15,7 +15,8 @@ elif [ "$1" == "test" ]; then
 
 
   # Extract overall line coverage percentage
-  line_coverage=$(echo "$output" | grep -A1 'All files' | tail -n1 | awk -F'|' '{print $2}' | xargs)
+  # line_coverage=$(echo "$output" | grep -A1 'All files' | tail -n1 | awk -F'|' '{print $2}' | xargs)
+  line_coverage=$(echo "$output" | awk '/All files/{print $10}' | xargs)
 
   # Print test outcomes
   if [ -z "$specs" ]; then specs=0; fi

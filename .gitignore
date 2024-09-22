@@ -19,6 +19,7 @@ build/
 # Logs
 logs/
 *.log
+log.txt
 
 # Dependency directories
 jspm_packages/
