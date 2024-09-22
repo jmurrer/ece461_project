@@ -2,18 +2,32 @@
 export async function netScore(url: string): Promise<string> {
   let data, openIssues, closedIssues;
 
-  // fetch data from GitHub and npm APIs
+  // convert npm URL to GitHub URL
   if (url.includes("npmjs.com")) {
     try {
-      data = await fetchNpmData(url);
-      // console.log("NPM Repository: ", data.repository);
-      if (!data.repositoryUrl) {
+      // Extract the package name from the URL
+      const packagePath = url.split("npmjs.com/package/")[1];
+      if (!packagePath) {
+        throw new Error("Invalid npm URL");
+      }
+
+      const apiUrl = `https://registry.npmjs.org/${packagePath}`;
+      const response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        throw new Error(`npm API error: ${response.statusText}`);
+      }
+      const repoURL = await response.json();
+
+      const repo: string = repoURL ? repoURL.repository.url : null;
+
+      if (!repo) {
         console.error("No repository URL found in npm data");
         return JSON.stringify({ mainScore: -1 });
       }
 
-      // Update NPM URL to Github URL
-      url = data.repositoryUrl.replace("git+", "").replace(".git", "");
+      // Update to Github URL
+      url = repo.replace("git+", "").replace(".git", "");
     } catch (err) {
       console.error(err);
       throw new Error("Error fetching npm data");
@@ -50,13 +64,6 @@ export async function netScore(url: string): Promise<string> {
     console.error("No contributor or maintainer data available");
     throw new Error("No contributor or maintainer data available");
   }
-
-  // // store intermediate scores
-  // let m_b: number = busFactorScore(count);
-  // let m_c: number = correctnessScore(data.issues);
-  // let m_r: number = await rampUpScore(url);
-  // let m_rm: number = responsivenessScore(openIssues, closedIssues);
-  // let m_l: number = licenseScore(data);
 
   // Calculate all metrics in parallel
   const [m_b, m_c, m_r, m_rm, m_l] = await Promise.all([
@@ -283,9 +290,6 @@ async function fetchGitHubData(url: string) {
     // Parse the JSON response
     const data = await response.json();
 
-    // Optionally, you can log or process the data here
-    // console.log("Fetched GitHub Data:", data);
-
     // Extract relevant information if needed
     const result = {
       stars: data.stargazers_count,
@@ -301,35 +305,6 @@ async function fetchGitHubData(url: string) {
     console.error("Error fetching GitHub data:", error);
     throw error; // Re-throw the error to be handled by the caller
   }
-}
-
-// Define a function to fetch data from the npm API
-async function fetchNpmData(url: string) {
-  // Extract the package name from the URL
-  const packagePath = url.split("npmjs.com/package/")[1];
-  if (!packagePath) {
-    throw new Error("Invalid npm URL");
-  }
-
-  const apiUrl = `https://registry.npmjs.org/${packagePath}`;
-  const response = await fetch(apiUrl);
-
-  if (!response.ok) {
-    throw new Error(`npm API error: ${response.statusText}`);
-  }
-  const data = await response.json();
-
-  // console.log("Response: ", response);
-  // console.log("NPM Data: ", data);
-  const maintainers = data.maintainers ? data.maintainers.length : 0;
-  const repositoryUrl = data.repository ? data.repository.url : null;
-  // console.log("maintainers NPM", maintainers)
-
-  return {
-    data,
-    maintainers: maintainers,
-    repositoryUrl: repositoryUrl,
-  };
 }
 
 // Define function to get issues data from GitHub URL (last 3 months)
@@ -408,3 +383,22 @@ async function fetchRepoContents(url: string): Promise<File[]> {
     throw error;
   }
 }
+
+// // Define a function to fetch data from the npm API
+// async function fetchNpmData(url: string) {
+//   // Extract the package name from the URL
+//   const packagePath = url.split("npmjs.com/package/")[1];
+//   if (!packagePath) {
+//     throw new Error("Invalid npm URL");
+//   }
+
+//   const apiUrl = `https://registry.npmjs.org/${packagePath}`;
+//   const response = await fetch(apiUrl);
+
+//   if (!response.ok) {
+//     throw new Error(`npm API error: ${response.statusText}`);
+//   }
+//   const data = await response.json();
+
+//   return data.repository ? data.repository.url : null;
+// }
