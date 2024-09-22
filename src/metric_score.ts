@@ -247,8 +247,7 @@ function licenseScore(data: any): number {
     "ISC License",
   ];
 
-  console.log("License:", data.license);
-  // Check if the license exists and if it is compatible
+  // Check if the license exists and if it is compatible with LGPL 2.1
   if (data.license && compatibleLicenses.includes(data.license)) {
     return 1; // License is present and compatible
   }
