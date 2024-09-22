@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# define log file as LOG_FILE or log.txt if undefined
+LOG_FILE=${LOG_FILE:-log.txt}
+
 # ./run install
 if [ "$1" == "install" ]; then
   echo "Installing Node program and dependencies"
@@ -15,7 +18,6 @@ elif [ "$1" == "test" ]; then
 
 
   # Extract overall line coverage percentage
-  # line_coverage=$(echo "$output" | grep -A1 'All files' | tail -n1 | awk -F'|' '{print $2}' | xargs)
   line_coverage=$(echo "$output" | awk '/All files/{print $10}' | xargs)
 
   # Print test outcomes
@@ -27,8 +29,7 @@ elif [ "$1" == "test" ]; then
 
 # ./run some text file
 elif [ -f "$1" ]; then
-  echo "Running Node program with file: $1"
-  npm start "$1"
+  npm start "$1" --silent 
   exit 0
 
 # catch-all for errors
