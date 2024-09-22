@@ -277,11 +277,6 @@ async function fetchGitHubData(url: string) {
     process.exit(1);
   }
 
-  if (githubToken === "INVALIDTOKEN") {
-    console.error("Error: Invalid GitHub token provided");
-    process.exit(1);
-  }
-
   // Construct the GitHub API URL
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
   try {
@@ -290,6 +285,11 @@ async function fetchGitHubData(url: string) {
         Authorization: `token ${githubToken}`,
       },
     });
+
+    if (response.status === 401) {
+      throw new Error("Invalid GitHub token provided. Please check your token.");
+      process.exit(1); // yielding to rc1
+    }
 
     // Check if the response is OK (status code 200-299)
     if (!response.ok) {
