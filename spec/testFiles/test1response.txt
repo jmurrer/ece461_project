@@ -1,1 +1,1 @@
-{"url":"https://github.com/mrdoob/three.js/","score":{"mainScore":2.5100000000000002,"scores":{"busFactor":{"score":10,"weight":0.2},"correctness":{"score":0.14,"weight":0.25},"rampUp":{"score":0.5,"weight":0.15},"responsiveness":{"score":1,"weight":0.3},"license":{"score":1,"weight":0.1}}}}
+{"url":"https://github.com/mrdoob/three.js/","score":{"mainScore":0.71,"scores":{"busFactor":1,"correctness":0.14,"rampUp":0.5,"responsiveness":1,"license":1}}}

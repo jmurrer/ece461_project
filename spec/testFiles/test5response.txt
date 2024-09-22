@@ -1,1 +1,1 @@
-abc
+{"url":"https://www.npmjs.com/package/unlicensed","score":{"mainScore":null,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.25,"responsiveness":null,"license":1}}}

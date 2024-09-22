@@ -89,11 +89,11 @@ export async function netScore(url: string): Promise<string> {
   const result = {
     mainScore: mainScore,
     scores: {
-      busFactor: { score: m_b, weight: w_b },
-      correctness: { score: m_c, weight: w_c },
-      rampUp: { score: m_r, weight: w_r },
-      responsiveness: { score: m_rm, weight: w_rm },
-      license: { score: m_l, weight: w_l },
+      busFactor: m_b,
+      correctness: m_c,
+      rampUp: m_r,
+      responsiveness: m_rm,
+      license: m_l,
     },
   };
 
@@ -116,7 +116,8 @@ function busFactorScore(contributorsCount: number): number {
     busFactorScore = 1;
   }
 
-  return busFactorScore;
+  // return normalized score
+  return busFactorScore / 10;
 }
 
 // analyzes reliability/quality of codebase
@@ -330,9 +331,16 @@ async function fetchIssues(url: string) {
   const closedIssuesURL = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&since=${lastMonthDate}`;
 
   try {
-    const openResponse = await fetch(openIssuesURL);
-    const closedResponse = await fetch(closedIssuesURL);
-    // console.log(closedResponse);
+    const openResponse = await fetch(openIssuesURL, {
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    });
+    const closedResponse = await fetch(closedIssuesURL, {
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    });
 
     const openIssues = await openResponse.json();
     const closedIssues = await closedResponse.json();
@@ -351,7 +359,11 @@ async function fetchCollaboratorsCount(url: string): Promise<any[]> {
   }
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.statusText}`);
     }
@@ -372,7 +384,11 @@ async function fetchRepoContents(url: string): Promise<File[]> {
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
 
   try {
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.statusText}`);
     }
@@ -383,22 +399,3 @@ async function fetchRepoContents(url: string): Promise<File[]> {
     throw error;
   }
 }
-
-// // Define a function to fetch data from the npm API
-// async function fetchNpmData(url: string) {
-//   // Extract the package name from the URL
-//   const packagePath = url.split("npmjs.com/package/")[1];
-//   if (!packagePath) {
-//     throw new Error("Invalid npm URL");
-//   }
-
-//   const apiUrl = `https://registry.npmjs.org/${packagePath}`;
-//   const response = await fetch(apiUrl);
-
-//   if (!response.ok) {
-//     throw new Error(`npm API error: ${response.statusText}`);
-//   }
-//   const data = await response.json();
-
-//   return data.repository ? data.repository.url : null;
-// }

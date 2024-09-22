@@ -1,1 +1,1 @@
-abc
+{"url":"https://www.npmjs.com/package/wat4hjs","score":{"mainScore":null,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.375,"responsiveness":null,"license":1}}}

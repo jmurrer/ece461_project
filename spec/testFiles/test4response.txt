@@ -1,1 +1,1 @@
-abc
+{"url":"https://www.npmjs.com/package/react","score":{"mainScore":0.68875,"scores":{"busFactor":1,"correctness":0.13,"rampUp":0.375,"responsiveness":1,"license":1}}}

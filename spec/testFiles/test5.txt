@@ -1,1 +1,1 @@
-https://www.npmjs.com/package/react
+https://www.npmjs.com/package/unlicensed
