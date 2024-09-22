@@ -103,7 +103,7 @@ export async function netScore(url: string): Promise<any> {
 
 // analyzes bus factor and returns M_b(r) as specified
 // in project plan
-function busFactorScore(contributorsCount: number): number {
+export function busFactorScore(contributorsCount: number): number {
   let busFactorScore;
 
   // each comparison is to a number of contributors that has ranges of safe,moderate, low, and very low
@@ -123,7 +123,7 @@ function busFactorScore(contributorsCount: number): number {
 
 // analyzes reliability/quality of codebase
 // and returns M_c,normalized(r) as specified in project plan
-async function correctnessScore(IssueCount: number): Promise<number> {
+export async function correctnessScore(IssueCount: number): Promise<number> {
   if (IssueCount === undefined || IssueCount === null) {
     await silent("Issue count is missing, returning correctness score of 0");
     return 0; // No issue count present, return 0
@@ -141,7 +141,7 @@ async function correctnessScore(IssueCount: number): Promise<number> {
 
 // analyzes presence and completness of relevant documentation
 // for new developers and return M_r(r) as specified in project plan
-async function rampUpScore(repoUrl: string): Promise<number> {
+export async function rampUpScore(repoUrl: string): Promise<number> {
   let documentationScore = 0;
   let organizationScore = 0;
   let setupScore = 0;
@@ -224,7 +224,7 @@ async function rampUpScore(repoUrl: string): Promise<number> {
 
 // Measures issue activity and frequency of closing issues
 // and returns M_rm,normalized(r) as specified in project plan
-function responsivenessScore(openIssues, closedIssues): number {
+export function responsivenessScore(openIssues, closedIssues): number {
   let numOpenIssues = openIssues.length;
   let numClosedIssues = closedIssues.length;
 
@@ -233,7 +233,7 @@ function responsivenessScore(openIssues, closedIssues): number {
   return score ? score : 0;
 }
 
-function licenseScore(data: any): number {
+export function licenseScore(data: any): number {
   // List of licenses that are compatible with LGPL 2.0
   const compatibleLicenses = [
     "GNU General Public License v2.0",
@@ -253,7 +253,7 @@ function licenseScore(data: any): number {
 }
 
 // Define a function to fetch data from the GitHub API
-async function fetchGitHubData(url: string) {
+export async function fetchGitHubData(url: string) {
   // Extract the repository owner and name from the URL
   const repoPath = url.split("github.com/")[1];
   if (!repoPath) {
@@ -313,7 +313,7 @@ async function fetchGitHubData(url: string) {
 }
 
 // Define function to get issues data from GitHub URL (last 3 months)
-async function fetchIssues(url: string) {
+export async function fetchIssues(url: string) {
   const now = new Date();
   now.setMonth(now.getMonth() - 3); // Subtract three months
   const lastMonthDate = now.toISOString();
@@ -356,7 +356,7 @@ async function fetchIssues(url: string) {
 }
 
 // function for getting the number of contributors from a GitHub repo
-async function fetchCollaboratorsCount(url: string): Promise<any[]> {
+export async function fetchCollaboratorsCount(url: string): Promise<any[]> {
   if (!url || !url.startsWith("https://api.github.com/repos/")) {
     throw new Error("Invalid contributors count URL");
   }
@@ -378,7 +378,7 @@ async function fetchCollaboratorsCount(url: string): Promise<any[]> {
 }
 
 // Fetch repo contents
-async function fetchRepoContents(url: string): Promise<File[]> {
+export async function fetchRepoContents(url: string): Promise<File[]> {
   const repoPath = url.split("github.com/")[1];
   if (!repoPath) throw new Error("Invalid GitHub URL");
 
