@@ -1,0 +1,1 @@
+{"url":"https://github.com/jquery/jquery","score":{"mainScore":0.74,"scores":{"busFactor":1,"correctness":0.18,"rampUp":0.625,"responsiveness":1,"license":1}}}

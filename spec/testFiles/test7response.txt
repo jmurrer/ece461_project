@@ -1,0 +1,1 @@
+{"url":"https://github.com/phpmyadmin/phpmyadmin","score":{"mainScore":0.69,"scores":{"busFactor":1,"correctness":0.13,"rampUp":0.375,"responsiveness":1,"license":1}}}

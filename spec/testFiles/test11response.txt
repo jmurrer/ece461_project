@@ -1,0 +1,1 @@
+{"url":"https://github.com/lonkamikaze/bsda2","score":{"mainScore":0.41,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.25,"responsiveness":0,"license":1}}}
