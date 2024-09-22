@@ -1,7 +1,7 @@
 import { info, debug, silent } from "./logger.js";
 
 // takes as input URL and returns a score
-export async function netScore(url: string): Promise<string> {
+export async function netScore(url: string): Promise<any> {
   let data, openIssues, closedIssues;
 
   // convert npm URL to GitHub URL
@@ -89,18 +89,16 @@ export async function netScore(url: string): Promise<string> {
 
   // construct result object, JSONify, then return
   const result = {
-    mainScore: mainScore,
-    scores: {
-      busFactor: m_b,
-      correctness: m_c,
-      rampUp: m_r,
-      responsiveness: m_rm,
-      license: m_l,
-    },
+    NET_SCORE: mainScore,
+    RAMP_UP_SCORE: m_r,
+    CORRECTNESS_SCORE: m_c,
+    BUS_FACTOR_SCORE: m_b,
+    RESPONSIVE_MAINTAINER_SCORE: m_rm,
+    LICENSE_SCORE: m_l,
   };
 
   await info(`Processed URL: ${url}, Score: ${mainScore}`);
-  return JSON.stringify(result, null, 2);
+  return result;
 }
 
 // analyzes bus factor and returns M_b(r) as specified

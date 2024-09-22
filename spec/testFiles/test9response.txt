@@ -1,1 +1,1 @@
-{"url":"https://github.com/technoweenie/large-repo-test","score":{"mainScore":0.27,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0,"responsiveness":0,"license":0}}}
+{"URL":"https://github.com/technoweenie/large-repo-test","NET_SCORE":0.27,"RAMP_UP_SCORE":0,"CORRECTNESS_SCORE":1,"BUS_FACTOR_SCORE":0.1,"RESPONSIVE_MAINTAINER_SCORE":0,"LICENSE_SCORE":0}

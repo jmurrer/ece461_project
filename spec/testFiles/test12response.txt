@@ -1,1 +1,1 @@
-{"url":"https://github.com/gojue/ecapture","score":{"mainScore":0.61,"scores":{"busFactor":1,"correctness":0.29,"rampUp":0.25,"responsiveness":1,"license":0}}}
+{"URL":"https://github.com/gojue/ecapture","NET_SCORE":0.61,"RAMP_UP_SCORE":0.25,"CORRECTNESS_SCORE":0.29,"BUS_FACTOR_SCORE":1,"RESPONSIVE_MAINTAINER_SCORE":1,"LICENSE_SCORE":0}

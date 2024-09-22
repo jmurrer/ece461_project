@@ -1,1 +1,1 @@
-{"url":"https://github.com/sparkle-project/Sparkle","score":{"mainScore":0.56,"scores":{"busFactor":1,"correctness":0.24,"rampUp":0,"responsiveness":1,"license":0}}}
+{"URL":"https://github.com/sparkle-project/Sparkle","NET_SCORE":0.56,"RAMP_UP_SCORE":0,"CORRECTNESS_SCORE":0.24,"BUS_FACTOR_SCORE":1,"RESPONSIVE_MAINTAINER_SCORE":1,"LICENSE_SCORE":0}

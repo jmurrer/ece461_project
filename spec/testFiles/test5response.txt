@@ -1,1 +1,1 @@
-{"url":"https://www.npmjs.com/package/unlicensed","score":{"mainScore":0.31,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.25,"responsiveness":0,"license":0}}}
+{"URL":"https://www.npmjs.com/package/unlicensed","NET_SCORE":0.31,"RAMP_UP_SCORE":0.25,"CORRECTNESS_SCORE":1,"BUS_FACTOR_SCORE":0.1,"RESPONSIVE_MAINTAINER_SCORE":0,"LICENSE_SCORE":0}

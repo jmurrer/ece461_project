@@ -7,10 +7,19 @@ async function processUrl(url: string) {
   try {
     const score = await ms.netScore(url);
     await info(`Processed URL: ${url}, Score: ${score}`);
-    return { url, score: JSON.parse(score) };
+    let ret = {
+      URL: url,
+      NET_SCORE: score.NET_SCORE,
+      RAMP_UP_SCORE: score.RAMP_UP_SCORE,
+      CORRECTNESS_SCORE: score.CORRECTNESS_SCORE,
+      BUS_FACTOR_SCORE: score.BUS_FACTOR_SCORE,
+      RESPONSIVE_MAINTAINER_SCORE: score.RESPONSIVE_MAINTAINER_SCORE,
+      LICENSE_SCORE: score.LICENSE_SCORE,
+    };
+    return ret;
   } catch (err) {
     await silent(`Error processing ${url}: ${err.message}`);
-    return { url, mainScore: -1 };
+    return { URL: url, NET_SCORE: -1 };
   }
 }
 

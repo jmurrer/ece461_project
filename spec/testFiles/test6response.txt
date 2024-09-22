@@ -1,1 +1,1 @@
-{"url":"https://www.npmjs.com/package/wat4hjs","score":{"mainScore":0.43,"scores":{"busFactor":0.1,"correctness":1,"rampUp":0.375,"responsiveness":0,"license":1}}}
+{"URL":"https://www.npmjs.com/package/wat4hjs","NET_SCORE":0.43,"RAMP_UP_SCORE":0.375,"CORRECTNESS_SCORE":1,"BUS_FACTOR_SCORE":0.1,"RESPONSIVE_MAINTAINER_SCORE":0,"LICENSE_SCORE":1}
