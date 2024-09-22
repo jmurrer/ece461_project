@@ -5,7 +5,6 @@ const measureLatency = async (fn: () => Promise<any>, label: string) => {
   const start = Date.now();
   const score = await fn();
   const latency = Date.now() - start;
-  console.log(`Metric: ${label}, Score: ${score}, Latency: ${latency}`);
   return { score, latency, label };
 };
 
@@ -299,11 +298,6 @@ export async function fetchGitHubData(url: string) {
 
   if (!githubToken) {
     throw new Error("GITHUB_TOKEN is not set in the environment");
-    process.exit(1);
-  }
-
-  if (githubToken === "INVALIDTOKEN") {
-    throw new Error("Invalid GitHub token provided");
     process.exit(1);
   }
 
