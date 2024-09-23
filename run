@@ -21,7 +21,7 @@ elif [ "$1" == "test" ]; then
   line_coverage=$(echo "$output" | awk '/All files/{print $10}' | xargs)
 
   # round line coverage to nearest integer
-  line_coverage=$(echo "($line_coverage + 0.5)/1" | bc)
+  line_coverage=$(awk "BEGIN {print ($line_coverage + 0.5)/1}")
 
   # Print test outcomes
   if [ -z "$specs" ]; then specs=0; fi

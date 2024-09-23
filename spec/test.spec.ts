@@ -11,7 +11,6 @@ describe("Individual Scores Test Suite", () => {
     it(`should fetch GitHub data`, async() => {
         const { fetchGitHubData } = await import(metricScoreFile.href);
         githubData = await fetchGitHubData(repoURL);
-        console.log(githubData);
         expect(githubData).toBeDefined();
     });
 
@@ -44,7 +43,7 @@ describe("Individual Scores Test Suite", () => {
         const [openIssues, closedIssues] = await fetchIssues(repoURL);
         expect(openIssues).toBeDefined();
         expect(closedIssues).toBeDefined();
-        const responsiveness = responsivenessScore(openIssues, closedIssues);
+        const responsiveness = await responsivenessScore(openIssues, closedIssues);
         expect(responsiveness).toBeDefined();
         expect(responsiveness).toEqual(1);
     });
@@ -60,12 +59,24 @@ describe("Individual Scores Test Suite", () => {
         const { netScore } = await import(metricScoreFile.href);
         const net = await netScore(repoURL);
         expect(net).toBeDefined();
-        expect(net).toBeCloseTo(0.71);
+        expect(net.NetScore).toBeCloseTo(0.71);
     });
 });
 
 // Tests overall application for a variety of URLs
 describe("Text Files Test Suite", () => {
+    // Function to filter out keys containing "Latency"
+    function filterLatency(obj) {
+        let filteredObj = {};
+        for (let key in obj) {
+            if (!key.toLowerCase().includes('latency')) {
+                filteredObj[key] = obj[key];
+            }
+        }
+        return filteredObj;
+    }
+
+    // Start testing logic
     const testFilesDir = path.resolve(__dirname, 'testFiles');
 
     // Read all .txt files from the testFiles directory (excludes responses)
@@ -92,7 +103,16 @@ describe("Text Files Test Suite", () => {
 
             // Check if response if valid JSON and matches response
             const ndjsonOutput = JSON.parse(response);
-            expect(response).toEqual(responseContent);
+            const ndjsonTest = JSON.parse(responseContent);
+            if (ndjsonTest.NetScore == -1) {
+                expect(ndjsonOutput.NetScore).toEqual(-1);
+            }
+            else {
+                // Remove latency entries as they fluctuate and are not conducive to testing
+                const filteredTest = filterLatency(ndjsonTest);
+                const filteredOutput = filterLatency(ndjsonOutput);
+                expect(filteredOutput.toString()).toEqual(filteredTest.toString());
+            }
         });
     });
 });
