@@ -8,7 +8,7 @@ enum LogLevel {
 }
 
 // Get log file path and log level from environment variables, with defaults
-const logFile = process.env.LOG_FILE || "./log.txt";
+const logFile = process.env.LOG_FILE || process.exit(1);
 const logLevel = parseInt(process.env.LOG_LEVEL || "0", 10);
 
 // Ensure log file exists (optional, can remove if not necessary)

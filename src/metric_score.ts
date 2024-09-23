@@ -32,14 +32,14 @@ export async function netScore(url: string): Promise<any> {
       const repo: string = repoURL ? repoURL.repository.url : null;
 
       if (!repo) {
-        await silent("No repository URL found in npm data");
+        await info("No repository URL found in npm data");
         return JSON.stringify({ mainScore: -1 });
       }
 
       // Update to Github URL
       url = repo.replace("git+", "").replace(".git", "");
     } catch (err) {
-      await silent("Error fetching npm data");
+      await info("Error fetching npm data");
       throw new Error("Error fetching npm data");
     }
   }
@@ -48,7 +48,7 @@ export async function netScore(url: string): Promise<any> {
     data = await fetchGitHubData(url);
     [openIssues, closedIssues] = await fetchIssues(url);
   } catch (err) {
-    await silent("Error fetching GitHub data");
+    await info("Error fetching GitHub data");
     throw new Error("Error fetching GitHub data");
   }
 
@@ -66,11 +66,11 @@ export async function netScore(url: string): Promise<any> {
         count = data.maintainers;
       }
     } catch (err) {
-      await silent("Error fetching contributors/maintainers");
+      await info("Error fetching contributors/maintainers");
       throw new Error("Error fetching contributors/maintainers");
     }
   } else {
-    await silent("No contributor or maintainer data available");
+    await info("No contributor or maintainer data available");
     throw new Error("No contributor or maintainer data available");
   }
 
@@ -149,7 +149,7 @@ export async function busFactorScore(
 // and returns M_c,normalized(r) as specified in project plan
 export async function correctnessScore(IssueCount: number): Promise<number> {
   if (IssueCount === undefined || IssueCount === null) {
-    await silent("Issue count is missing, returning correctness score of 0");
+    await info("Issue count is missing, returning correctness score of 0");
     return 0; // No issue count present, return 0
   }
 
@@ -241,7 +241,7 @@ export async function rampUpScore(repoUrl: string): Promise<number> {
 
     return normalizedScore;
   } catch (error) {
-    await silent("Error fetching repository contents for ramp-up score");
+    await info("Error fetching repository contents for ramp-up score");
     return 0; // Default to 0 if there's an error
   }
 }

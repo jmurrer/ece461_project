@@ -27,7 +27,7 @@ async function processUrl(url: string) {
     };
     return ret;
   } catch (err) {
-    await silent(`Error processing ${url}: ${err.message}`);
+    await info(`Error processing ${url}: ${err.message}`);
     return { URL: url, NetScore: -1 };
   }
 }
@@ -36,7 +36,7 @@ export async function main(testFile?: string) {
   await info("Program started");
   // check if filename provided
   if (process.argv.length < 3 && !testFile) {
-    await silent("Usage: npm start <filename>");
+    await info("Usage: npm start <filename>");
     process.exit(1);
   }
 
@@ -61,7 +61,7 @@ export async function main(testFile?: string) {
     // print output to console
     console.log(ndjsonOutput);
   } catch (err) {
-    await silent(`Error reading file: ${filename}. Error: ${err.message}`);
+    await info(`Error reading file: ${filename}. Error: ${err.message}`);
     process.exit(1);
   } finally {
     if (testFile) {
