@@ -63,6 +63,7 @@ This command installs all necessary dependencies for the project. The program wi
 Run the Application with URL List:
 
 ./run <URL_FILE>
+BE SURE TO SET YOUR GITHUB TOKEN (export GUTHUB_TOKEN=<your token>) BEFORE RUNNING THE APPLICATION OR IT WILL NOT FUNCTION PROPERLY
 The URL_FILE must contain a list of newline-delimited URLs from npm or GitHub. The application will analyze each repository and output NDJSON with fields:
 
 URL
