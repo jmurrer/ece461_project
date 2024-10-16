@@ -1,0 +1,50 @@
+import fetch from 'node-fetch';
+import { netScore } from './rating';  // Assuming you have netScore implemented
+
+// Function to fetch npm package data
+async function fetchNpmPackageData(packageName) {
+  const apiUrl = `https://registry.npmjs.org/${packageName}`;
+  const response = await fetch(apiUrl);
+  if (!response.ok) throw new Error(`Error fetching package data: ${response.statusText}`);
+  return response.json();
+}
+
+// Function to check if package meets minimum score requirements
+async function checkPackageRating(repoUrl) {
+  const rating = await netScore(repoUrl);
+  const requiredMetrics = ["BusFactor", "Correctness", "RampUp", "ResponsiveMaintainer", "License"];
+  for (const metric of requiredMetrics) {
+    if (rating[metric] < 0.5) throw new Error(`Package does not meet the minimum score for ${metric}`);
+  }
+  return true;
+}
+
+// Function to upload package to registry
+async function uploadPackageToRegistry(packageData) {
+  const apiUrl = '/upload-endpoint';  // Update with actual endpoint
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(packageData),
+  });
+  if (!response.ok) throw new Error('Error uploading package');
+  return response.json();
+}
+
+// Ingestion process
+export async function ingestPackage(packageName) {
+  const packageData = await fetchNpmPackageData(packageName);
+  const repoUrl = packageData.repository.url.replace('git+', '').replace('.git', '');
+  await checkPackageRating(repoUrl);
+  return uploadPackageToRegistry(packageData);
+}
+
+// Example usage
+(async () => {
+  try {
+    const result = await ingestPackage('express');  // Example package
+    console.log('Package uploaded successfully:', result);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+})();
