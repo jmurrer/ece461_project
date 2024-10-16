@@ -1,4 +1,4 @@
-import { ingestPackage } from '/src/ingestPackage';
+import { ingestPackage } from '../ingestPackage';
 import fetch from 'node-fetch';  // Mocking fetch
 import { netScore } from '../metric_score';  // Mocking netScore
 
