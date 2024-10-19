@@ -1,86 +1,62 @@
-const AWS = require('aws-sdk');
+const axios = require('axios');
 
-// Initialize DynamoDB client
-const dynamoDB = new AWS.DynamoDB.DocumentClient({
-  region: 'us-east-1',
-});
+// Mock function for fetching package metadata (replace with actual API call)
+async function fetchPackageMetadata(packageID) {
+  const response = await axios.get(`https://api.example.com/package/${packageID}`, {
+    headers: { 'X-Authorization': 'your-auth-token' }
+  });
+  return response.data;
+}
 
-// Function to recursively fetch the size of a package and its dependencies
-async function fetchPackageSize(packageID, visited = new Set()) {
-  // Avoid infinite recursion on circular dependencies
+// Function to calculate the size cost of a package and its transitive dependencies
+async function calculatePackageSize(packageID, includeDependencies = true, visited = new Set()) {
+  // Avoid double-counting shared dependencies
   if (visited.has(packageID)) {
     return 0;
   }
   
   visited.add(packageID);
 
-  // Get the package from DynamoDB
-  const params = {
-    TableName: 'PackageRegistry', // Replace with your actual table name
-    Key: { packageID },
-  };
+  const packageData = await fetchPackageMetadata(packageID);
+  const packageSize = packageData.data.Content.size || 0; // Assuming size is in Content object
 
-  const result = await dynamoDB.get(params).promise();
-  const pkg = result.Item;
-
-  if (!pkg) {
-    throw new Error(`Package with ID ${packageID} not found`);
+  // If dependencies are excluded, return standalone cost
+  if (!includeDependencies || !packageData.metadata.dependencies || packageData.metadata.dependencies.length === 0) {
+    return packageSize;
   }
 
-  // Base size of the package (direct size)
-  let totalSize = pkg.size || 0;
-
-  // Recursively calculate the size of each dependency
-  if (pkg.dependencies && pkg.dependencies.length > 0) {
-    for (const depID of pkg.dependencies) {
-      totalSize += await fetchPackageSize(depID, visited);
-    }
+  // Recursively calculate the size of dependencies
+  let totalSize = packageSize;
+  for (const depID of packageData.metadata.dependencies) {
+    totalSize += await calculatePackageSize(depID, includeDependencies, visited);
   }
 
   return totalSize;
 }
 
-// Check size cost of multiple packages at once
-async function checkSizeCost(packageIDs) {
+// Function to check the cumulative size cost of multiple packages
+async function checkCumulativeSizeCost(packageIDs, includeDependencies = true) {
   const visited = new Set();
+  const packageCosts = {};
+
   let totalCost = 0;
 
+  // Calculate the cost for each package
   for (const packageID of packageIDs) {
-    totalCost += await fetchPackageSize(packageID, visited);
+    const sizeCost = await calculatePackageSize(packageID, includeDependencies, visited);
+    packageCosts[packageID] = sizeCost;
+    totalCost += sizeCost;
   }
 
   return {
     totalCost,
-    individualCosts: Array.from(visited).map(id => ({ packageID: id, size: totalCost })),
+    individualCosts: packageCosts
   };
 }
 
-// Reset the registry to its default state
-async function resetRegistry() {
-  // Here, we will clear the package registry by deleting all items in the table
-  const params = {
-    TableName: 'PackageRegistry', // Replace with your table name
-  };
-
-  const scanResult = await dynamoDB.scan(params).promise();
-  const deletePromises = scanResult.Items.map(item => {
-    const deleteParams = {
-      TableName: 'PackageRegistry',
-      Key: { packageID: item.packageID },
-    };
-    return dynamoDB.delete(deleteParams).promise();
-  });
-
-  await Promise.all(deletePromises);
-
-  // Optionally, you can add the default user again
-  const defaultUserParams = {
-    TableName: 'PackageRegistry',
-    Item: { packageID: 'default-user', name: 'default', size: 0 },
-  };
-  await dynamoDB.put(defaultUserParams).promise();
-
-  return 'Registry reset to default state';
-}
-
-module.exports = { checkSizeCost, resetRegistry };
+// Export the functions for use in other modules
+module.exports = {
+  fetchPackageMetadata,
+  calculatePackageSize,
+  checkCumulativeSizeCost,
+};
