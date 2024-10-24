@@ -8,7 +8,7 @@
     "outDir": "dist",
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/tests/**/*.ts"],
+  "include": ["src/**/*.ts", "src/tests/**/*.ts", "src/ingestPackage.test.ts", "src/ingestPackage.ts", "src/logger.js"],
   "lib": ["es2015"]
 }
 

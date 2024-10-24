@@ -1,7 +1,8 @@
 import * as ms from "./metric_score.js";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { info, debug, silent } from "./logger.js";
+import { info } from "./logger.js";
+import { searchPackagesByRegex } from './packageService';
 
 async function processUrl(url: string) {
   try {
@@ -32,15 +33,38 @@ async function processUrl(url: string) {
   }
 }
 
+async function searchPackages(regEx: string) {
+  const packages = await searchPackagesByRegex(regEx);
+  if (packages.length === 0) {
+    console.log("No packages found.");
+  } else {
+    console.log(`Found ${packages.length} packages matching the regex:`);
+    packages.forEach(pkg => {
+      console.log(`- ${pkg.name} (${pkg.version})`);
+    });
+  }
+}
+
 export async function main(testFile?: string) {
   await info("Program started");
-  // check if filename provided
-  if (process.argv.length < 3 && !testFile) {
-    await info("Usage: npm start <filename>");
+
+  // Handle arguments
+  const args = process.argv.slice(2);
+  
+  if (args.length < 2 && !testFile) {
+    await info("Usage: npm start <filename> or npm start --search <regex>");
     process.exit(1);
   }
 
-  const filename = testFile ? testFile : process.argv[2];
+  // Check if it's a regex search or URL processing
+  if (args[0] === '--search') {
+    const regEx = args[1];
+    await searchPackages(regEx);
+    await info("Search operation completed.");
+    process.exit(0);
+  }
+
+  const filename = testFile ? testFile : args[0];
   let ndjsonOutput;
 
   try {

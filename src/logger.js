@@ -1,14 +1,14 @@
-import * as fs from "fs/promises";
+const fs = require("fs/promises");
 
-// Define log levels
-enum LogLevel {
-  SILENT = 0,
-  INFO = 1,
-  DEBUG = 2,
-}
+// Define log levels as an object instead of enum
+const LogLevel = {
+  SILENT: 0,
+  INFO: 1,
+  DEBUG: 2,
+};
 
-// Get log file path and log level from environment variables, with defaults
-const logFile = process.env.LOG_FILE || process.exit(1);
+// Provide a default value for logFile in case it's not set in the environment
+const logFile = process.env.LOG_FILE || "default-log.txt";  // Use a default file name
 const logLevel = parseInt(process.env.LOG_LEVEL || "0", 10);
 
 // Ensure log file exists (optional, can remove if not necessary)
@@ -21,27 +21,27 @@ async function ensureLogFileExists() {
 }
 
 // Utility function to log messages
-async function log(message: string, level: LogLevel) {
+async function log(message, level) {
   if (level <= logLevel) {
-    const logMessage = `[${new Date().toISOString()}] ${
-      LogLevel[level]
-    }: ${message}\n`;
+    const logMessage = `[${new Date().toISOString()}] ${Object.keys(LogLevel)[level]}: ${message}\n`;
     await fs.appendFile(logFile, logMessage, "utf8");
   }
 }
 
 // Specific log level functions
-export async function info(message: string) {
+async function info(message) {
   await ensureLogFileExists();
   await log(message, LogLevel.INFO);
 }
 
-export async function debug(message: string) {
+async function debug(message) {
   await ensureLogFileExists();
   await log(message, LogLevel.DEBUG);
 }
 
-export async function silent(message: string) {
+async function silent(message) {
   await ensureLogFileExists();
   await log(message, LogLevel.SILENT);
 }
+
+module.exports = { info, debug, silent };
